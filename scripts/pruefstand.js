@@ -22,13 +22,18 @@ function main() {
   const dateien = fs.readdirSync(lektionenDir).filter((f) => f.endsWith('.md'));
   let hatFehler = false;
   for (const datei of dateien) {
-    const lektion = parseLektion(path.join(lektionenDir, datei));
-    const result = validateLektion(lektion);
-    if (!result.valid) {
+    try {
+      const lektion = parseLektion(path.join(lektionenDir, datei));
+      const result = validateLektion(lektion);
+      if (!result.valid) {
+        hatFehler = true;
+        console.error(`${datei}: ${result.errors.join(', ')}`);
+      } else {
+        console.log(`${datei}: OK`);
+      }
+    } catch (err) {
       hatFehler = true;
-      console.error(`${datei}: ${result.errors.join(', ')}`);
-    } else {
-      console.log(`${datei}: OK`);
+      console.error(`${datei}: Fehler beim Einlesen – ${err.message}`);
     }
   }
   process.exit(hatFehler ? 1 : 0);
