@@ -12,6 +12,7 @@ function main() {
 
   fs.mkdirSync(distDir, { recursive: true });
   fs.copyFileSync(path.join(__dirname, 'toggle.js'), path.join(distDir, 'toggle.js'));
+  fs.copyFileSync(path.join(__dirname, 'styles.css'), path.join(distDir, 'styles.css'));
 
   const dateien = fs.readdirSync(lektionenDir).filter((f) => f.endsWith('.md'));
   const lektionsListe = [];
@@ -40,12 +41,21 @@ function main() {
 
   const indexHtml = `<!DOCTYPE html>
 <html lang="de">
-<head><meta charset="UTF-8"><title>Deutsch für Au-Pairs</title></head>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deutsch für Au-Pairs</title>
+<link rel="stylesheet" href="styles.css">
+</head>
 <body>
+<main class="lektion">
 <h1>Deutsch für Au-Pairs</h1>
-<ul>
+<section class="block block--wortschatz">
+<ul class="wortschatz-liste">
 ${lektionsListe.map((l) => `<li><a href="${l.dateiname}">${l.titel}</a></li>`).join('\n')}
 </ul>
+</section>
+</main>
 </body>
 </html>`;
   fs.writeFileSync(path.join(distDir, 'index.html'), indexHtml);

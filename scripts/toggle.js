@@ -9,6 +9,11 @@ function wendeZustandAufDomAn(zustand) {
 }
 
 function registriereUmschalter() {
+  const beschriftung = {
+    de: 'Verstehst du das nicht? Hier auf Englisch',
+    en: 'Zurück auf Deutsch',
+  };
+
   document.querySelectorAll('.sprach-umschalter').forEach((button) => {
     let zustand = 'de';
     button.addEventListener('click', () => {
@@ -17,6 +22,8 @@ function registriereUmschalter() {
       ziel.querySelectorAll('[data-sprache]').forEach((el) => {
         el.style.display = el.dataset.sprache === zustand ? '' : 'none';
       });
+      button.textContent = beschriftung[zustand];
+      button.setAttribute('aria-pressed', zustand === 'en' ? 'true' : 'false');
     });
   });
 }

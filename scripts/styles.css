@@ -1,0 +1,255 @@
+/* Deutsch für Au-Pairs — Lektions-Stylesheet
+   Keine externen Schriften, keine Netzwerk-Aufrufe: System-Schriftstapel,
+   damit die Seite offline-fähig bleibt (passt zur Projekt-Konvention).
+
+   Palette: sattes Terrakotta als Seiten-Grund, helle warme Karten darauf —
+   bewusste Entscheidung statt des generischen Creme/Beige-Hintergrunds. */
+
+:root {
+  --bg: #a8471f;
+  --surface: #fbf1e2;
+  --surface-audio: #e9f1e0;
+  --text: #2b2420;
+  --text-on-canvas: #fff8ee;
+  --text-muted: #6b5f52;
+  --accent: #7a2f12;
+  --accent-hover: #632410;
+  --accent-contrast: #fff8ee;
+  --sage: #2f4a35;
+  --border: #e3d4bd;
+}
+
+* ,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+:focus-visible {
+  outline: 3px solid var(--surface);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+main.lektion {
+  max-width: 42rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.25rem 4rem;
+}
+
+h1 {
+  font-size: clamp(1.7rem, 5vw, 2.3rem);
+  line-height: 1.15;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  color: var(--text-on-canvas);
+}
+
+h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-on-canvas);
+  margin: 2.5rem 0 0.75rem;
+}
+
+.block:first-of-type h2 {
+  margin-top: 0;
+}
+
+.lernziel {
+  background: var(--surface);
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 0 0 2.25rem;
+  font-size: 1.05rem;
+  color: var(--text);
+  box-shadow: 0 8px 20px -12px rgba(30, 15, 5, 0.55);
+}
+
+.block {
+  background: var(--surface);
+  border-radius: 0.9rem;
+  padding: 1.1rem 1.25rem 1.25rem;
+  margin-top: 1.5rem;
+  box-shadow: 0 8px 20px -12px rgba(30, 15, 5, 0.5);
+}
+
+.block h2 {
+  margin-top: 0;
+  color: var(--accent);
+}
+
+/* Wortschatz */
+
+.wortschatz-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.wortschatz-liste li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.wortschatz-liste li:last-child {
+  border-bottom: none;
+}
+
+.wortschatz-liste .deutsch {
+  font-weight: 600;
+}
+
+.wortschatz-liste .englisch {
+  color: var(--text-muted);
+  font-style: italic;
+  white-space: nowrap;
+}
+
+/* Dialog */
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.dialog-zeile {
+  margin: 0;
+  max-width: 85%;
+  padding: 0.6rem 0.9rem;
+  border-radius: 0.9rem;
+  background: var(--surface-audio);
+}
+
+.dialog-zeile:nth-child(odd) {
+  align-self: flex-start;
+}
+
+.dialog-zeile:nth-child(even) {
+  align-self: flex-end;
+  background: #f1e3cf;
+}
+
+.sprecher {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Grammatik / Umschalter */
+
+.erklaerung-text {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.sprach-umschalter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.9rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sprach-umschalter:hover {
+  background: var(--accent-hover);
+}
+
+/* Übung */
+
+.uebung-text {
+  white-space: pre-line;
+}
+
+/* Hörübung */
+
+.audio-karte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.audio-kopf {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--sage);
+  font-weight: 600;
+}
+
+.audio-kopf svg {
+  flex-shrink: 0;
+}
+
+.audio-karte audio {
+  width: 100%;
+}
+
+.audio-karte .uebung-text {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+/* Mobil */
+
+@media (max-width: 480px) {
+  main.lektion {
+    padding: 1.75rem 1rem 3rem;
+  }
+
+  .block {
+    padding: 1rem 1rem 1.1rem;
+  }
+
+  .wortschatz-liste li {
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .dialog-zeile {
+    max-width: 92%;
+  }
+}
+
+/* Scrollbar (nur WebKit/Blink, rein dekorativ, kein Funktionsverlust ohne) */
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface);
+  border-radius: 999px;
+}
