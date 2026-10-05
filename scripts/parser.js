@@ -28,6 +28,9 @@ function parseWortschatz(body) {
   const rows = section.split('\n').filter((line) => line.startsWith('|') && !line.includes('---'));
   return rows.slice(1).map((row) => {
     const [, de, en] = row.split('|').map((cell) => cell.trim());
+    if (!de || !en) {
+      throw new Error(`Malformed wortschatz row: "${row.slice(0, 60)}" (missing de or en value)`);
+    }
     return { de, en };
   });
 }

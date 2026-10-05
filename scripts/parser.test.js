@@ -27,3 +27,9 @@ test('parseLektion liest Dialog, Grammatik, Übung, Hörübung', () => {
   assert.strictEqual(lektion.uebung, 'Übungstext hier.');
   assert.strictEqual(lektion.hoertext, 'Hörtext hier.');
 });
+
+test('parseLektion wirft Fehler bei malformed Wortschatz-Zeile', () => {
+  assert.throws(() => {
+    parseLektion(path.join(__dirname, 'fixtures', 'malformed-wortschatz.md'));
+  }, /Malformed wortschatz row/);
+});
