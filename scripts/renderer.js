@@ -92,6 +92,19 @@ ${teile.join('\n')}
 `;
 }
 
+/**
+ * Hängt eine kurze Prüfsumme an Stylesheet und Skript.
+ *
+ * GitHub Pages liefert diese Dateien mit zehn Minuten Zwischenspeicher aus.
+ * Ohne Stempel sieht jemand, der die Seite vorher schon einmal geöffnet
+ * hatte, nach einer Änderung neues HTML mit altem CSS – die Seite ist dann
+ * unbrauchbar. Mit dem Stempel ändert sich bei jeder Änderung die Adresse,
+ * und der Browser holt die Datei von allein neu.
+ */
+function mitVersion(datei, version) {
+  return version ? `${datei}?v=${version}` : datei;
+}
+
 const STIFT_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>`;
 
 const MUND_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/></svg>`;
@@ -153,8 +166,10 @@ ${zeilen}
  *   Akzentfarbe und Szenenbild. Fehlt er, wird die Seite schlicht gebaut.
  * @param {object} [navigation]  Ergebnis von baueNavigation – erzeugt die
  *   Verknüpfungen zur vorherigen und nächsten Lektion am Seitenende.
+ * @param {{css?: string, js?: string}} [versionen]  Kurze Prüfsummen von
+ *   Stylesheet und Skript. Siehe mitVersion().
  */
-function renderLektionHtml(lektion, eintrag, navigation) {
+function renderLektionHtml(lektion, eintrag, navigation, versionen = {}) {
   const nummer = String(lektion.id).padStart(2, '0');
   const szenenbild = eintrag
     ? `<div class="szenenbild" style="background:${eintrag.akzent}">
@@ -168,7 +183,7 @@ function renderLektionHtml(lektion, eintrag, navigation) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${lektion.titel} – Deutsch für Au-Pairs</title>
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="${mitVersion('styles.css', versionen.css)}">
 </head>
 <body>
 <header class="kopfzeile">
@@ -223,7 +238,7 @@ ${renderNachsprechen(lektion)}
 ${renderNavigation(navigation)}<p class="lektion-fuss"><a class="zurueck" href="index.html">${ZURUECK_ICON}<span>Alle Lektionen in der Übersicht</span></a></p>
 
 </main>
-<script src="toggle.js"></script>
+<script src="${mitVersion('toggle.js', versionen.js)}"></script>
 </body>
 </html>`;
 }

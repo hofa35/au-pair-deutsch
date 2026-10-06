@@ -1,10 +1,15 @@
 // scripts/build.js
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { parseLektion } = require('./parser.js');
 const { validateLektion } = require('./pruefstand.js');
 const { renderLektionHtml, baueNavigation } = require('./renderer.js');
 const { renderStartseiteHtml } = require('./startseite.js');
+
+function kurzpruefsumme(datei) {
+  return crypto.createHash('sha1').update(fs.readFileSync(datei)).digest('hex').slice(0, 10);
+}
 
 function dateinameFuer(id) {
   return `lektion-${String(id).padStart(2, '0')}.html`;
@@ -19,6 +24,14 @@ function main() {
   fs.mkdirSync(distDir, { recursive: true });
   fs.copyFileSync(path.join(__dirname, 'toggle.js'), path.join(distDir, 'toggle.js'));
   fs.copyFileSync(path.join(__dirname, 'styles.css'), path.join(distDir, 'styles.css'));
+
+  // Prüfsummen von Stylesheet und Skript. Sie hängen als ?v=... an den
+  // Verweisen, damit Browser nach einer Änderung nicht altes CSS zu neuem
+  // HTML mischen. GitHub Pages speichert diese Dateien zehn Minuten zwischen.
+  const versionen = {
+    css: kurzpruefsumme(path.join(__dirname, 'styles.css')),
+    js: kurzpruefsumme(path.join(__dirname, 'toggle.js')),
+  };
 
   // Bilder sind fertig aufbereitet eingecheckt (siehe scripts/bilder-aufbereiten.js).
   if (fs.existsSync(bilderDir)) {
@@ -71,12 +84,13 @@ function main() {
     const html = renderLektionHtml(
       lektion,
       uebersichtNachNr.get(lektion.id),
-      baueNavigation(lektion.id, uebersicht, gebaut)
+      baueNavigation(lektion.id, uebersicht, gebaut),
+      versionen
     );
     fs.writeFileSync(path.join(distDir, dateinameFuer(lektion.id)), html);
   }
 
-  fs.writeFileSync(path.join(distDir, 'index.html'), renderStartseiteHtml(uebersicht, gebaut));
+  fs.writeFileSync(path.join(distDir, 'index.html'), renderStartseiteHtml(uebersicht, gebaut, versionen));
 
   console.log(`Build fertig: ${gebaut.size} von ${uebersicht.length} Lektion(en) in dist/`);
 }

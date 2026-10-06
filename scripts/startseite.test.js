@@ -45,3 +45,13 @@ test('nur das erste Bild lädt sofort, der Rest verzögert', () => {
   assert.equal(html.match(/loading="lazy"/g).length, 2); // Karte 2 und das Avatar in der Fußzeile
   assert.doesNotMatch(html, /lektion-01\.webp"[^>]*loading="lazy"/);
 });
+
+test('die Startseite verweist auf das Stylesheet mit Versionsstempel', () => {
+  const html = renderStartseiteHtml(uebersicht, new Map(), { css: 'abc123' });
+  assert.match(html, /href="styles\.css\?v=abc123"/);
+});
+
+test('ohne Version bleibt der Verweis schlicht', () => {
+  const html = renderStartseiteHtml(uebersicht, new Map());
+  assert.match(html, /href="styles\.css"/);
+});

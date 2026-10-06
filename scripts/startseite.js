@@ -51,8 +51,12 @@ function renderKarte(eintrag, lektionsDatei, istErste) {
 /**
  * @param {Array} uebersicht  Inhalt von lektionen/uebersicht.json
  * @param {Map<number, {titel: string, dateiname: string}>} gebaut  fertige Lektionen
+ * @param {{css?: string}} [versionen]  Prüfsumme des Stylesheets, damit
+ *   Browser nach einer Änderung nicht am alten Zwischenspeicher hängen
+ *   bleiben. Siehe mitVersion() in renderer.js.
  */
-function renderStartseiteHtml(uebersicht, gebaut) {
+function renderStartseiteHtml(uebersicht, gebaut, versionen = {}) {
+  const stylesheet = versionen.css ? `styles.css?v=${versionen.css}` : 'styles.css';
   const ersteFertige = uebersicht.find((e) => gebaut.has(e.nr));
   const anzahlFertig = gebaut.size;
 
@@ -80,7 +84,7 @@ function renderStartseiteHtml(uebersicht, gebaut) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Deutsch für Au-Pairs</title>
 <meta name="description" content="Kostenloses Deutsch auf Niveau A1 für Au-Pairs in Deutschland. 15 Lektionen zu Gastfamilie, Haushalt, Kindern und Alltag – mit Hörübungen und englischer Hilfe auf Knopfdruck.">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="${stylesheet}">
 </head>
 <body class="startseite">
 

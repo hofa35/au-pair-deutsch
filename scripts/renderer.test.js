@@ -138,3 +138,15 @@ test('Nachsprech-Audio wird nicht vorgeladen', () => {
   assert.match(html, /nachsprechen-1\.mp3/);
   assert.doesNotMatch(html, /preload="auto"/);
 });
+
+test('Stylesheet und Skript bekommen einen Versionsstempel', () => {
+  const html = renderLektionHtml(beispielLektion, undefined, undefined, { css: 'abc123', js: 'def456' });
+  assert.match(html, /href="styles\.css\?v=abc123"/);
+  assert.match(html, /src="toggle\.js\?v=def456"/);
+});
+
+test('ohne Versionen bleiben die Verweise schlicht', () => {
+  const html = renderLektionHtml(beispielLektion);
+  assert.match(html, /href="styles\.css"/);
+  assert.match(html, /src="toggle\.js"/);
+});
