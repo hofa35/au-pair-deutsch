@@ -1,3 +1,7 @@
 dist/
 *.log
 .env
+
+# Rohbilder aus dem Mira-Artefakt (rund 10 MB, nur lokal gebraucht).
+# Der Build nutzt die fertig aufbereiteten Dateien in bilder/.
+bildkarten-quelle/
