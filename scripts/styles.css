@@ -1,25 +1,45 @@
-/* Deutsch für Au-Pairs — Lektions-Stylesheet
+/* Deutsch für Au-Pairs — Stylesheet für Startseite und Lektionsseiten
    Keine externen Schriften, keine Netzwerk-Aufrufe: System-Schriftstapel,
-   damit die Seite offline-fähig bleibt (passt zur Projekt-Konvention).
+   damit die Seite offline-fähig bleibt (Projekt-Konvention).
 
-   Palette: sattes Terrakotta als Seiten-Grund, helle warme Karten darauf —
-   bewusste Entscheidung statt des generischen Creme/Beige-Hintergrunds. */
+   Palette: die Farbwerte stammen aus der Mira-Bildkarten-Vorlage und sind
+   dort direkt aus dem Code übernommen, nicht nachempfunden. Warmes
+   Creme-Weiß als Grund, dunkles Warmbraun als Text, dazu die fünf
+   Pastell-Akzente, mit denen auch die Illustrationen hinterlegt sind. */
 
 :root {
-  --bg: #a8471f;
-  --surface: #fbf1e2;
-  --surface-audio: #e9f1e0;
-  --text: #2b2420;
-  --text-on-canvas: #fff8ee;
-  --text-muted: #6b5f52;
-  --accent: #7a2f12;
-  --accent-hover: #632410;
-  --accent-contrast: #fff8ee;
-  --sage: #2f4a35;
-  --border: #e3d4bd;
+  /* Grundflächen */
+  --grund: #FFFBF5;
+  --karte: #FFFFFF;
+  --karte-warm: #FFF3E4;
+
+  /* Schrift */
+  --text: #2D2A26;
+  --text-sanft: #5E5550;
+  /* aus #8B7E74 der Vorlage abgedunkelt: kleine Beschriftungen erreichen
+     sonst den geforderten Kontrast von 4,5:1 auf dem Creme-Grund nicht */
+  --text-leise: #6B6058;
+  --text-zart: #9C8C7F;
+
+  /* Pastell-Akzente */
+  --pfirsich: #FFECD2;
+  --rosa: #FFE4EC;
+  --lavendel: #E8E6FF;
+  --gruen: #D9F0E8;
+  --blau: #E2F0FF;
+  --signal: #A8E6A0;
+
+  /* Linien und Schatten */
+  --linie: rgba(45, 42, 38, 0.10);
+  --linie-zart: rgba(45, 42, 38, 0.06);
+  --schatten: 0 1px 2px rgba(45, 42, 38, 0.04), 0 8px 24px -14px rgba(45, 42, 38, 0.35);
+  --schatten-hoch: 0 2px 4px rgba(45, 42, 38, 0.05), 0 18px 40px -20px rgba(45, 42, 38, 0.45);
+
+  --radius: 1.1rem;
+  --radius-gross: 1.6rem;
 }
 
-* ,
+*,
 *::before,
 *::after {
   box-sizing: border-box;
@@ -27,6 +47,7 @@
 
 html {
   font-size: 100%;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -34,67 +55,532 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.6;
   color: var(--text);
-  background: var(--bg);
+  background: var(--grund);
+  -webkit-text-size-adjust: 100%;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
 }
 
 ::selection {
-  background: var(--accent);
-  color: var(--accent-contrast);
+  background: var(--pfirsich);
+  color: var(--text);
 }
 
 :focus-visible {
-  outline: 3px solid var(--surface);
+  outline: 3px solid var(--text);
   outline-offset: 3px;
-  border-radius: 2px;
+  border-radius: 4px;
 }
+
+/* ------------------------------------------------------------------ *
+ * Kopfzeile (beide Seitentypen)
+ * ------------------------------------------------------------------ */
+
+.kopfzeile {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
+  background: rgba(255, 251, 245, 0.88);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--linie-zart);
+}
+
+.wortmarke {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.kopf-hinweis {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-leise);
+}
+
+.zurueck {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-sanft);
+  transition: color 0.15s ease;
+}
+
+.zurueck:hover {
+  color: var(--text);
+}
+
+.zurueck svg {
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ *
+ * Startseite: Hero
+ * ------------------------------------------------------------------ */
+
+.startseite main {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2.5rem);
+}
+
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(2.5rem, 6vw, 4.5rem) 0 clamp(2rem, 5vw, 3.5rem);
+}
+
+.hero-schein {
+  position: absolute;
+  inset: -15% -10% -10%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(42% 42% at 18% 12%, var(--pfirsich) 0%, transparent 68%),
+    radial-gradient(38% 42% at 88% 22%, var(--lavendel) 0%, transparent 68%),
+    radial-gradient(44% 38% at 8% 88%, var(--gruen) 0%, transparent 68%);
+  opacity: 0.75;
+}
+
+.augenbraue {
+  margin: 0 0 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: var(--karte);
+  box-shadow: inset 0 0 0 1px var(--linie);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-leise);
+}
+
+.hero h1 {
+  margin: 0 0 1.1rem;
+  font-size: clamp(2rem, 5.5vw, 3.2rem);
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+}
+
+.hero-kursiv {
+  display: block;
+  margin-top: 0.3rem;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--text-zart);
+  font-size: 0.72em;
+}
+
+.hero-fliess {
+  margin: 0 0 1.75rem;
+  max-width: 54ch;
+  font-size: clamp(1rem, 1.6vw, 1.1rem);
+  color: var(--text-sanft);
+}
+
+.hero-knopfreihe {
+  margin: 0 0 0.85rem;
+}
+
+.hero-kleingedruckt {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-leise);
+}
+
+.hero-bild {
+  display: flex;
+  justify-content: center;
+}
+
+.hero-bild img {
+  width: min(100%, 20rem);
+  filter: drop-shadow(0 24px 34px rgba(45, 42, 38, 0.18));
+}
+
+/* Knöpfe */
+
+.knopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  border-radius: 999px;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.knopf--primaer {
+  background: var(--text);
+  color: var(--grund);
+  box-shadow: var(--schatten);
+}
+
+.knopf--primaer:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--schatten-hoch);
+}
+
+.knopf--aus {
+  background: var(--karte);
+  color: var(--text-leise);
+  box-shadow: inset 0 0 0 1px var(--linie);
+  cursor: default;
+}
+
+/* ------------------------------------------------------------------ *
+ * Startseite: Anleitung
+ * ------------------------------------------------------------------ */
+
+.anleitung {
+  background: var(--karte);
+  border-radius: var(--radius-gross);
+  box-shadow: inset 0 0 0 1px var(--linie-zart), var(--schatten);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  margin-bottom: clamp(2.5rem, 6vw, 4rem);
+}
+
+.anleitung h2 {
+  margin: 0 0 1.25rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-leise);
+}
+
+.schritte {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem 1.75rem;
+}
+
+.schritte li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  font-size: 0.95rem;
+  color: var(--text-sanft);
+}
+
+.schritt-nummer {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.55rem;
+  height: 1.55rem;
+  margin-top: 0.1rem;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--grund);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.anleitung-tipp {
+  margin: 1.5rem 0 0;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--linie-zart);
+  font-size: 0.88rem;
+  color: var(--text-zart);
+}
+
+/* ------------------------------------------------------------------ *
+ * Startseite: Lektionsraster
+ * ------------------------------------------------------------------ */
+
+.uebersicht {
+  padding-bottom: clamp(3rem, 7vw, 5rem);
+}
+
+.uebersicht-kopf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.uebersicht-kopf h2 {
+  margin: 0;
+  font-size: clamp(1.4rem, 3vw, 1.85rem);
+  letter-spacing: -0.02em;
+}
+
+.uebersicht-stand {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--text-leise);
+}
+
+.karten {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17.5rem, 1fr));
+  gap: 1.25rem;
+}
+
+.karte {
+  display: block;
+  height: 100%;
+  padding: 0.6rem 0.6rem 1.1rem;
+  border-radius: var(--radius-gross);
+  background: var(--karte);
+  box-shadow: inset 0 0 0 1px var(--linie-zart), var(--schatten);
+  text-decoration: none;
+  color: inherit;
+}
+
+.karte--offen {
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.karte--offen:hover {
+  transform: translateY(-3px);
+  box-shadow: inset 0 0 0 1px var(--linie), var(--schatten-hoch);
+}
+
+.karte--bald .karte-bild img {
+  opacity: 0.88;
+}
+
+.karte-bild {
+  border-radius: 1.2rem;
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+}
+
+.karte-bild img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.karte-kopf {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0.9rem 0.5rem 0;
+}
+
+.karte-nummer {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.6rem;
+  height: 1.6rem;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--grund);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.karte-schlagwort {
+  padding: 0.25rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--text);
+}
+
+.karte-status {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-leise);
+}
+
+.karte-pfeil {
+  margin-left: auto;
+  display: inline-flex;
+  color: var(--text-zart);
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.karte--offen:hover .karte-pfeil {
+  transform: translateX(3px);
+  color: var(--text);
+}
+
+.karte-titel {
+  margin: 0.75rem 0.5rem 0;
+  font-size: 1.08rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  font-weight: 700;
+}
+
+.karte-satz {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  margin: 0.6rem 0.5rem 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  font-style: italic;
+  color: var(--text-sanft);
+}
+
+.karte-satz svg {
+  flex-shrink: 0;
+  margin-top: 0.35rem;
+  color: var(--text-zart);
+}
+
+/* ------------------------------------------------------------------ *
+ * Startseite: Fußzeile
+ * ------------------------------------------------------------------ */
+
+.fusszeile-huelle {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 2.5rem) clamp(2rem, 5vw, 3.5rem);
+}
+
+.fusszeile {
+  display: flex;
+  align-items: center;
+  gap: clamp(1rem, 3vw, 1.75rem);
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  border-radius: var(--radius-gross);
+  background: var(--text);
+  color: var(--grund);
+}
+
+.fuss-avatar {
+  flex-shrink: 0;
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: 999px;
+  background: var(--pfirsich);
+  object-fit: cover;
+}
+
+.fuss-satz {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.fuss-klein {
+  margin: 0.6rem 0 0;
+  font-size: 0.82rem;
+  color: rgba(255, 251, 245, 0.68);
+}
+
+/* ------------------------------------------------------------------ *
+ * Lektionsseite
+ * ------------------------------------------------------------------ */
 
 main.lektion {
-  max-width: 42rem;
+  max-width: 44rem;
   margin: 0 auto;
-  padding: 2.5rem 1.25rem 4rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem) clamp(1rem, 4vw, 1.5rem) 3rem;
 }
 
-h1 {
-  font-size: clamp(1.7rem, 5vw, 2.3rem);
+.szenenbild {
+  border-radius: var(--radius-gross);
+  overflow: hidden;
+  margin-bottom: 1.75rem;
+  box-shadow: var(--schatten);
+}
+
+.szenenbild img {
+  width: 100%;
+}
+
+main.lektion h1 {
+  font-size: clamp(1.75rem, 4.5vw, 2.5rem);
   line-height: 1.15;
-  font-weight: 700;
-  margin: 0 0 1.25rem;
-  color: var(--text-on-canvas);
-}
-
-h2 {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--text-on-canvas);
-  margin: 2.5rem 0 0.75rem;
-}
-
-.block:first-of-type h2 {
-  margin-top: 0;
+  letter-spacing: -0.025em;
+  font-weight: 800;
+  margin: 0 0 1.1rem;
 }
 
 .lernziel {
-  background: var(--surface);
-  border-radius: 0.75rem;
+  margin: 0 0 2rem;
   padding: 1rem 1.25rem;
-  margin: 0 0 2.25rem;
+  border-radius: var(--radius);
+  background: var(--karte-warm);
+  box-shadow: inset 0 0 0 1px var(--linie-zart);
   font-size: 1.05rem;
-  color: var(--text);
-  box-shadow: 0 8px 20px -12px rgba(30, 15, 5, 0.55);
 }
 
 .block {
-  background: var(--surface);
-  border-radius: 0.9rem;
-  padding: 1.1rem 1.25rem 1.25rem;
-  margin-top: 1.5rem;
-  box-shadow: 0 8px 20px -12px rgba(30, 15, 5, 0.5);
+  margin-top: 1.25rem;
+  padding: 1.25rem 1.35rem 1.4rem;
+  border-radius: var(--radius-gross);
+  background: var(--karte);
+  box-shadow: inset 0 0 0 1px var(--linie-zart), var(--schatten);
 }
 
 .block h2 {
-  margin-top: 0;
-  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 0.9rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-leise);
 }
+
+/* Farbpunkt je Abschnitt – nimmt die Pastelltöne der Bildkarten auf */
+.block h2::before {
+  content: "";
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 999px;
+  background: var(--pfirsich);
+  box-shadow: inset 0 0 0 1px var(--linie);
+}
+
+.block--dialog h2::before { background: var(--blau); }
+.block--grammatik h2::before { background: var(--lavendel); }
+.block--uebung h2::before { background: #FFF2CC; }
+.block--schreiben h2::before { background: var(--rosa); }
+.block--nachsprechen h2::before { background: #D6F2F5; }
+.block--audio h2::before { background: var(--gruen); }
 
 /* Wortschatz */
 
@@ -109,7 +595,7 @@ h2 {
   justify-content: space-between;
   gap: 1rem;
   padding: 0.55rem 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--linie-zart);
 }
 
 .wortschatz-liste li:last-child {
@@ -121,7 +607,7 @@ h2 {
 }
 
 .wortschatz-liste .englisch {
-  color: var(--text-muted);
+  color: var(--text-leise);
   font-style: italic;
   white-space: nowrap;
 }
@@ -137,26 +623,27 @@ h2 {
 .dialog-zeile {
   margin: 0;
   max-width: 85%;
-  padding: 0.6rem 0.9rem;
-  border-radius: 0.9rem;
-  background: var(--surface-audio);
+  padding: 0.65rem 0.95rem;
+  border-radius: 1.1rem;
+  background: var(--blau);
 }
 
 .dialog-zeile:nth-child(odd) {
   align-self: flex-start;
+  border-bottom-left-radius: 0.35rem;
 }
 
 .dialog-zeile:nth-child(even) {
   align-self: flex-end;
-  background: #f1e3cf;
+  background: var(--pfirsich);
+  border-bottom-right-radius: 0.35rem;
 }
 
 .sprecher {
   font-weight: 700;
-  color: var(--accent);
 }
 
-/* Grammatik / Umschalter */
+/* Grammatik und Umschalter */
 
 .erklaerung-text {
   margin: 0;
@@ -167,26 +654,134 @@ h2 {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 0.9rem;
+  margin-top: 1rem;
   border: none;
   border-radius: 999px;
-  padding: 0.55rem 1.1rem;
+  padding: 0.6rem 1.15rem;
+  font-family: inherit;
   font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--accent-contrast);
-  background: var(--accent);
+  font-weight: 700;
+  color: var(--grund);
+  background: var(--text);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .sprach-umschalter:hover {
-  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--schatten);
 }
 
 /* Übung */
 
 .uebung-text {
   white-space: pre-line;
+}
+
+/* Lösung zum Aufklappen.
+   Bewusst <details> statt eines eigenen Umschalters: das kann der Browser
+   selbst, braucht kein JavaScript und ist mit der Tastatur bedienbar. */
+
+.loesung {
+  margin-top: 1.2rem;
+}
+
+.loesung > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  list-style: none;
+  cursor: pointer;
+  border-radius: 999px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text);
+  box-shadow: inset 0 0 0 1.5px var(--linie);
+  transition: background-color 0.15s ease;
+}
+
+.loesung > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Winkel, der sich beim Aufklappen nach unten dreht */
+.loesung > summary::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-top: -0.15rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.loesung[open] > summary::before {
+  margin-top: -0.3rem;
+  transform: rotate(45deg);
+}
+
+.loesung > summary:hover {
+  background: var(--karte-warm);
+}
+
+.loesung > .uebung-text {
+  margin-top: 0.9rem;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--gruen);
+}
+
+/* Schreibübung und Nachsprechen */
+
+.schreib-kopf {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.9rem;
+  font-weight: 700;
+  color: var(--text-sanft);
+}
+
+.schreib-kopf svg {
+  flex-shrink: 0;
+}
+
+.nachsprech-hinweis {
+  margin: 0 0 1.1rem;
+  font-size: 0.88rem;
+  color: var(--text-leise);
+}
+
+.nachsprech-liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+
+.nachsprech-zeile {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0.95rem;
+  border-radius: var(--radius);
+  background: var(--karte-warm);
+}
+
+.nachsprech-satz {
+  margin: 0;
+  font-weight: 600;
+}
+
+.nachsprech-zeile audio {
+  flex-shrink: 0;
+  width: 12.5rem;
+  height: 2.1rem;
 }
 
 /* Hörübung */
@@ -201,12 +796,12 @@ h2 {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  color: var(--sage);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .audio-kopf svg {
   flex-shrink: 0;
+  color: var(--text-sanft);
 }
 
 .audio-karte audio {
@@ -215,18 +810,109 @@ h2 {
 
 .audio-karte .uebung-text {
   margin: 0;
-  color: var(--text-muted);
+  color: var(--text-sanft);
 }
 
-/* Mobil */
+/* Fußnavigation: zur vorherigen und zur nächsten Lektion */
 
-@media (max-width: 480px) {
-  main.lektion {
-    padding: 1.75rem 1rem 3rem;
+.weiter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 2.5rem;
+}
+
+.weiter-karte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1rem 1.2rem;
+  border-radius: var(--radius);
+  background: var(--karte);
+  box-shadow: inset 0 0 0 1px var(--linie-zart), var(--schatten);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+/* Die nächste Lektion sitzt immer rechts, auch wenn links nichts steht. */
+.weiter-karte--vor {
+  grid-column: 2;
+  text-align: right;
+}
+
+a.weiter-karte:hover {
+  transform: translateY(-2px);
+  box-shadow: inset 0 0 0 1px var(--linie), var(--schatten-hoch);
+}
+
+.weiter-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-leise);
+}
+
+.weiter-karte--vor .weiter-label {
+  justify-content: flex-end;
+}
+
+.weiter-titel {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+/* Noch nicht geschriebene Lektion: sichtbar als Ausblick, aber nicht klickbar. */
+.weiter-karte--bald {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--linie-zart);
+}
+
+.weiter-karte--bald .weiter-titel {
+  color: var(--text-zart);
+  font-weight: 600;
+}
+
+.lektion-fuss {
+  margin: 1.5rem 0 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--linie-zart);
+  text-align: center;
+}
+
+/* ------------------------------------------------------------------ *
+ * Schmale Fenster
+ * ------------------------------------------------------------------ */
+
+@media (max-width: 56rem) {
+  .hero {
+    grid-template-columns: 1fr;
+    text-align: left;
   }
 
-  .block {
-    padding: 1rem 1rem 1.1rem;
+  .hero-bild {
+    order: -1;
+  }
+
+  /* Mira bleibt oben, darf aber die erste Bildschirmhöhe nicht auffressen:
+     über die Höhe begrenzt, damit die Überschrift noch sichtbar ist. */
+  .hero-bild img {
+    width: auto;
+    max-height: min(42vh, 22rem);
+  }
+}
+
+@media (max-width: 34rem) {
+  .fusszeile {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
   }
 
   .wortschatz-liste li {
@@ -234,22 +920,52 @@ h2 {
     gap: 0.15rem;
   }
 
+  .wortschatz-liste .englisch {
+    white-space: normal;
+  }
+
   .dialog-zeile {
     max-width: 92%;
   }
+
+  /* Satz über den Abspieler, sonst wird beides zu schmal */
+  .nachsprech-zeile {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .nachsprech-zeile audio {
+    width: 100%;
+  }
+
+  .weiter {
+    grid-template-columns: 1fr;
+  }
+
+  .weiter-karte--vor {
+    grid-column: 1;
+    text-align: left;
+  }
+
+  .weiter-karte--vor .weiter-label {
+    justify-content: flex-start;
+  }
+
+  .karten {
+    grid-template-columns: 1fr;
+  }
 }
 
-/* Scrollbar (nur WebKit/Blink, rein dekorativ, kein Funktionsverlust ohne) */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 
-::-webkit-scrollbar {
-  width: 12px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--bg);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--surface);
-  border-radius: 999px;
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

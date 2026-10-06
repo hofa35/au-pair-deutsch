@@ -1,0 +1,17 @@
+[
+  { "nr": 1,  "titel": "Ankommen und sich vorstellen",                 "satz": "Hallo, ich bin Mira! Ich freue mich, euch kennenzulernen.", "schlagwort": "Start",       "akzent": "#FFECD2" },
+  { "nr": 2,  "titel": "Meine Gastfamilie",                            "satz": "Das ist meine Gastfamilie. Wir essen zusammen zu Abend.",  "schlagwort": "Familie",     "akzent": "#E8E6FF" },
+  { "nr": 3,  "titel": "Mein Zimmer, mein Zuhause",                    "satz": "Mein Zimmer ist hell und gemütlich. Hier fühle ich mich wohl.", "schlagwort": "Zuhause",  "akzent": "#D9F0E8" },
+  { "nr": 4,  "titel": "Der Tagesablauf",                              "satz": "Morgens wecke ich die Kinder um sieben Uhr.",              "schlagwort": "Alltag",      "akzent": "#FFF0C7" },
+  { "nr": 5,  "titel": "Die Uhrzeit und der Stundenplan der Kinder",   "satz": "Um halb drei hat Leo Klavier, um vier Hausaufgaben.",      "schlagwort": "Zeit",        "akzent": "#E2F0FF" },
+  { "nr": 6,  "titel": "Essen und Kochen für die Familie",             "satz": "Heute koche ich Gemüsesuppe. Mögt ihr das?",               "schlagwort": "Küche",       "akzent": "#FFDED6" },
+  { "nr": 7,  "titel": "Einkaufen gehen",                              "satz": "Ich brauche Milch, Brot und Äpfel für das Frühstück.",     "schlagwort": "Einkauf",     "akzent": "#E8F5D9" },
+  { "nr": 8,  "titel": "Die Kinder betreuen",                          "satz": "Ich passe auf die Kinder auf und lese eine Geschichte vor.", "schlagwort": "Betreuung", "akzent": "#FFE4EC" },
+  { "nr": 9,  "titel": "Mit den Kindern spielen und sprechen",         "satz": "Wollen wir zusammen Bauklötze bauen?",                     "schlagwort": "Spielen",     "akzent": "#D6F2F5" },
+  { "nr": 10, "titel": "Der Weg zu Schule und Kindergarten",           "satz": "Wir gehen zu Fuß zur Schule. Der Weg ist kurz.",           "schlagwort": "Unterwegs",   "akzent": "#FFF2CC" },
+  { "nr": 11, "titel": "Mit Lehrkräften und Erzieherinnen sprechen",   "satz": "Wie war Emma heute im Kindergarten?",                      "schlagwort": "Gespräch",    "akzent": "#E9E4FF" },
+  { "nr": 12, "titel": "Notfälle und Gesundheit",                      "satz": "Leo hat Fieber. Ich rufe die Gastmutter an.",              "schlagwort": "Hilfe",       "akzent": "#FFD9D9" },
+  { "nr": 13, "titel": "Termine und Verabredungen",                    "satz": "Hast du morgen um 15 Uhr Zeit für ein Treffen?",           "schlagwort": "Planen",      "akzent": "#D9F0FF" },
+  { "nr": 14, "titel": "Meine Meinung sagen, kleine Konflikte klären", "satz": "Ich brauche am Wochenende etwas mehr Freizeit, bitte.",    "schlagwort": "Miteinander", "akzent": "#F0E6D9" },
+  { "nr": 15, "titel": "Rückblick: Was habe ich diese Woche gemacht?", "satz": "Diese Woche habe ich viel gelernt und gelacht.",           "schlagwort": "Rückblick",   "akzent": "#E8F3E8" }
+]
