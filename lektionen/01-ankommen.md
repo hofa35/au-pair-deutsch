@@ -55,8 +55,30 @@ Ergänze die richtige Form von "sein":
 3. Wir ___ eine Familie.
 4. Wie ___ dein Name?
 
-Lösung: 1. bin, 2. bist, 3. sind, 4. ist
+## Lösung
+
+1. bin, 2. bist, 3. sind, 4. ist
+
+## Schreibübung
+
+Jetzt stell dich selbst vor. Schreib drei Sätze:
+
+1. Wie heißt du?
+2. Woher kommst du?
+3. Sag zum Schluss, dass du dich freust.
+
+## Beispiellösung
+
+Hallo, ich heiße Lucia. Ich komme aus Kolumbien. Freut mich, dich kennenzulernen!
 
 ## Hörübung
 
 Hallo, ich heiße Mira. Ich komme aus den Philippinen. Ich bin neu hier in Deutschland. Freut mich, dich kennenzulernen!
+
+## Nachsprechen
+
+Hallo, ich heiße Mira.
+Ich komme aus den Philippinen.
+Woher kommst du?
+Freut mich!
+Auf Wiedersehen!
