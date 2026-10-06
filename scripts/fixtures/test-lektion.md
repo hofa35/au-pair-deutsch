@@ -32,3 +32,20 @@ English grammar text.
 ## Hörübung
 
 Hörtext hier.
+
+## Lösung
+
+Lösungstext hier.
+
+## Schreibübung
+
+Schreibaufgabe hier.
+
+## Beispiellösung
+
+Beispieltext hier.
+
+## Nachsprechen
+
+Erster Satz.
+Zweiter Satz.

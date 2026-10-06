@@ -1,4 +1,11 @@
 // scripts/generate_audio.js
+//
+// Erzeugt die Hörübungen über Google Cloud Text-to-Speech.
+//
+//   node scripts/generate_audio.js          # nur fehlende Audios
+//   node scripts/generate_audio.js --neu    # alle neu erzeugen
+//
+// Der Schlüssel steht in GOOGLE_TTS_API_KEY (lokal in .env, nicht versioniert).
 const fs = require('node:fs');
 const https = require('node:https');
 const path = require('node:path');
@@ -39,13 +46,44 @@ async function main() {
   const apiKey = process.env.GOOGLE_TTS_API_KEY;
   if (!apiKey) throw new Error('Umgebungsvariable GOOGLE_TTS_API_KEY ist nicht gesetzt');
 
-  const lektion = parseLektion(path.join(__dirname, '..', 'lektionen', '01-ankommen.md'));
-  const audioBase64 = await rufeTtsApiAuf(lektion.hoertext, apiKey);
+  const alleNeu = process.argv.includes('--neu');
+  const lektionenDir = path.join(__dirname, '..', 'lektionen');
+  const dateien = fs.readdirSync(lektionenDir).filter((f) => f.endsWith('.md')).sort();
 
-  const zielOrdner = path.join(__dirname, '..', 'audio', String(lektion.id));
-  fs.mkdirSync(zielOrdner, { recursive: true });
-  fs.writeFileSync(path.join(zielOrdner, 'hoeruebung.mp3'), Buffer.from(audioBase64, 'base64'));
-  console.log(`Audio geschrieben: audio/${lektion.id}/hoeruebung.mp3`);
+  for (const datei of dateien) {
+    const lektion = parseLektion(path.join(lektionenDir, datei));
+    const zielOrdner = path.join(__dirname, '..', 'audio', String(lektion.id));
+
+    // Hörübung plus je eine Datei pro Nachsprech-Satz, damit einzelne Sätze
+    // beliebig oft wiederholt werden können.
+    const auftraege = [{ name: 'hoeruebung.mp3', text: lektion.hoertext }];
+    lektion.nachsprechen.forEach((satz, i) => {
+      auftraege.push({ name: `nachsprechen-${i + 1}.mp3`, text: satz });
+    });
+
+    for (const auftrag of auftraege) {
+      const ziel = path.join(zielOrdner, auftrag.name);
+      if (fs.existsSync(ziel) && !alleNeu) {
+        console.log(`Lektion ${lektion.id}: ${auftrag.name} existiert bereits, übersprungen`);
+        continue;
+      }
+      const audioBase64 = await rufeTtsApiAuf(auftrag.text, apiKey);
+      fs.mkdirSync(zielOrdner, { recursive: true });
+      fs.writeFileSync(ziel, Buffer.from(audioBase64, 'base64'));
+      console.log(`Lektion ${lektion.id}: ${auftrag.name} geschrieben`);
+    }
+
+    // Dateien aufräumen, die zu gelöschten Nachsprech-Sätzen gehören.
+    if (fs.existsSync(zielOrdner)) {
+      const erlaubt = new Set(auftraege.map((a) => a.name));
+      for (const vorhanden of fs.readdirSync(zielOrdner)) {
+        if (vorhanden.startsWith('nachsprechen-') && !erlaubt.has(vorhanden)) {
+          fs.rmSync(path.join(zielOrdner, vorhanden));
+          console.log(`Lektion ${lektion.id}: ${vorhanden} entfernt, Satz gibt es nicht mehr`);
+        }
+      }
+    }
+  }
 }
 
 if (require.main === module) main().catch((err) => { console.error(err); process.exit(1); });

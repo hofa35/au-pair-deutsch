@@ -13,7 +13,19 @@ function validateLektion(lektion) {
   if (!lektion.grammatikDe) errors.push('grammatikDe fehlt');
   if (!lektion.grammatikEn) errors.push('grammatikEn fehlt');
   if (!lektion.uebung) errors.push('uebung fehlt');
+  // Die Lösung steht in einem eigenen Abschnitt, weil sie auf der Seite
+  // zugeklappt wird. Ohne sie gäbe es nichts zum Aufklappen.
+  if (!lektion.loesung) errors.push('loesung fehlt');
   if (!lektion.hoertext) errors.push('hoertext fehlt');
+
+  // Freiwillige Abschnitte: wenn vorhanden, dann aber vollständig.
+  if (lektion.schreibuebung && !lektion.beispielloesung) {
+    errors.push('schreibuebung ohne beispielloesung');
+  }
+  if (lektion.beispielloesung && !lektion.schreibuebung) {
+    errors.push('beispielloesung ohne schreibuebung');
+  }
+
   return { valid: errors.length === 0, errors };
 }
 

@@ -35,6 +35,20 @@ function parseWortschatz(body) {
   });
 }
 
+/**
+ * Zerlegt den Abschnitt "Nachsprechen" in einzelne Sätze, einen pro Zeile.
+ * Jeder Satz bekommt später eine eigene Audiodatei, damit man ihn einzeln
+ * wiederholen kann.
+ */
+function parseNachsprechen(body) {
+  const section = getSection(body, 'Nachsprechen');
+  if (!section) return [];
+  return section
+    .split('\n')
+    .map((zeile) => zeile.trim())
+    .filter((zeile) => zeile !== '');
+}
+
 function parseLektion(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   const { frontmatter, body } = parseFrontmatter(raw);
@@ -48,7 +62,11 @@ function parseLektion(filePath) {
     grammatikDe: getSection(body, 'Grammatik Deutsch'),
     grammatikEn: getSection(body, 'Grammatik Englisch'),
     uebung: getSection(body, 'Übung'),
+    loesung: getSection(body, 'Lösung'),
+    schreibuebung: getSection(body, 'Schreibübung'),
+    beispielloesung: getSection(body, 'Beispiellösung'),
     hoertext: getSection(body, 'Hörübung'),
+    nachsprechen: parseNachsprechen(body),
   };
 }
 

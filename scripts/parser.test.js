@@ -33,3 +33,40 @@ test('parseLektion wirft Fehler bei malformed Wortschatz-Zeile', () => {
     parseLektion(path.join(__dirname, 'fixtures', 'malformed-wortschatz.md'));
   }, /Malformed wortschatz row/);
 });
+
+test('parseLektion liest die neuen Abschnitte', () => {
+  const lektion = parseLektion(path.join(__dirname, 'fixtures', 'test-lektion.md'));
+  assert.strictEqual(lektion.loesung, 'Lösungstext hier.');
+  assert.strictEqual(lektion.schreibuebung, 'Schreibaufgabe hier.');
+  assert.strictEqual(lektion.beispielloesung, 'Beispieltext hier.');
+});
+
+test('Lösung und Beispiellösung werden nicht verwechselt', () => {
+  const lektion = parseLektion(path.join(__dirname, 'fixtures', 'test-lektion.md'));
+  assert.notStrictEqual(lektion.loesung, lektion.beispielloesung);
+  assert.doesNotMatch(lektion.loesung, /Beispiel/);
+});
+
+test('parseLektion zerlegt Nachsprechen in einzelne Sätze', () => {
+  const lektion = parseLektion(path.join(__dirname, 'fixtures', 'test-lektion.md'));
+  assert.deepStrictEqual(lektion.nachsprechen, ['Erster Satz.', 'Zweiter Satz.']);
+});
+
+test('fehlende freiwillige Abschnitte ergeben leere Werte', () => {
+  const fs = require('node:fs');
+  const os = require('node:os');
+  const knapp = path.join(os.tmpdir(), 'knappe-lektion.md');
+  fs.writeFileSync(
+    knapp,
+    [
+      '---', 'id: 9', 'titel: "Knapp"', 'lernziel: "Z"', 'grammatikfokus: "G"', '---',
+      '', '## Wortschatz', '', '| Deutsch | Englisch |', '|---|---|', '| Hallo | Hello |',
+      '', '## Übung', '', 'Nur eine Übung.', '',
+    ].join('\n')
+  );
+  const lektion = parseLektion(knapp);
+  assert.deepStrictEqual(lektion.nachsprechen, []);
+  assert.strictEqual(lektion.schreibuebung, '');
+  assert.strictEqual(lektion.beispielloesung, '');
+  fs.rmSync(knapp);
+});
