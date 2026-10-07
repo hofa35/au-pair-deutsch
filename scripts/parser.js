@@ -1,4 +1,13 @@
 // scripts/parser.js
+//
+// Liest die Inhaltsdateien aus lektionen/. Es gibt zwei Arten:
+//
+//   Lektion        – der Regelfall, feste Abschnitte (Wortschatz, Dialog, ...)
+//   Wiederholung   – Zwischenstation nach mehreren Lektionen, frei viele
+//                    Aufgaben, kein Wortschatz, kein Audio
+//
+// Unterschieden wird über das Frontmatter-Feld "typ". Fehlt es, ist die
+// Datei eine Lektion – so bleiben alle bisherigen Dateien unverändert gültig.
 const fs = require('node:fs');
 
 function parseFrontmatter(raw) {
@@ -49,10 +58,48 @@ function parseNachsprechen(body) {
     .filter((zeile) => zeile !== '');
 }
 
-function parseLektion(filePath) {
-  const raw = fs.readFileSync(filePath, 'utf8');
-  const { frontmatter, body } = parseFrontmatter(raw);
+/**
+ * Zerlegt einen Rumpf in seine "## "-Abschnitte, in der Reihenfolge der Datei.
+ *
+ * getSection() sucht gezielt nach einem bekannten Namen. Wiederholungsseiten
+ * haben dagegen beliebig viele gleichartige Abschnitte ("Aufgabe: ..."),
+ * deshalb braucht es hier den vollständigen Durchlauf.
+ *
+ * @returns {Array<{titel: string, inhalt: string}>}
+ */
+function parseAbschnitte(body) {
+  const roh = [];
+  const regex = /^## (.+)$/gm;
+  let match;
+  while ((match = regex.exec(body)) !== null) {
+    roh.push({ titel: match[1].trim(), von: regex.lastIndex, bis: body.length });
+    if (roh.length > 1) roh[roh.length - 2].bis = match.index;
+  }
+  return roh.map(({ titel, von, bis }) => ({ titel, inhalt: body.slice(von, bis).trim() }));
+}
+
+/**
+ * Trennt bei einer Aufgabe den Aufgabentext von der Lösung.
+ *
+ * Die Lösung steht in einer Unterüberschrift, weil sie auf der Seite
+ * zugeklappt wird. "Beispiellösung" ist die Variante für freie Aufgaben,
+ * bei denen es keine einzig richtige Antwort gibt.
+ */
+function trenneLoesung(inhalt) {
+  const match = inhalt.match(/\n### (Lösung|Beispiellösung)\s*\n([\s\S]*)$/);
+  if (!match) return { text: inhalt.trim(), loesung: '', loesungArt: '' };
   return {
+    text: inhalt.slice(0, match.index).trim(),
+    loesung: match[2].trim(),
+    loesungArt: match[1],
+  };
+}
+
+const AUFGABE_MUSTER = /^Aufgabe\s*[:·\-–]?\s*(.*)$/;
+
+function parseLektionAus(frontmatter, body) {
+  return {
+    art: 'lektion',
     id: frontmatter.id,
     titel: frontmatter.titel,
     lernziel: frontmatter.lernziel,
@@ -70,4 +117,45 @@ function parseLektion(filePath) {
   };
 }
 
-module.exports = { parseLektion };
+function parseWiederholungAus(frontmatter, body) {
+  const aufgaben = [];
+  for (const abschnitt of parseAbschnitte(body)) {
+    const treffer = abschnitt.titel.match(AUFGABE_MUSTER);
+    if (!treffer) continue;
+    aufgaben.push({ titel: treffer[1].trim(), ...trenneLoesung(abschnitt.inhalt) });
+  }
+
+  return {
+    art: 'wiederholung',
+    nr: frontmatter.nr,
+    titel: frontmatter.titel,
+    umfasst: frontmatter.umfasst,
+    einstiegDe: getSection(body, 'Einstieg Deutsch'),
+    einstiegEn: getSection(body, 'Einstieg Englisch'),
+    aufgaben,
+    rueckmeldung: getSection(body, 'Rückmeldung'),
+  };
+}
+
+/** Liest eine Datei und entscheidet anhand von "typ", wie sie gelesen wird. */
+function parseDokument(filePath) {
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const { frontmatter, body } = parseFrontmatter(raw);
+  return frontmatter.typ === 'wiederholung'
+    ? parseWiederholungAus(frontmatter, body)
+    : parseLektionAus(frontmatter, body);
+}
+
+function parseLektion(filePath) {
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const { frontmatter, body } = parseFrontmatter(raw);
+  return parseLektionAus(frontmatter, body);
+}
+
+function parseWiederholung(filePath) {
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const { frontmatter, body } = parseFrontmatter(raw);
+  return parseWiederholungAus(frontmatter, body);
+}
+
+module.exports = { parseLektion, parseWiederholung, parseDokument, parseAbschnitte };

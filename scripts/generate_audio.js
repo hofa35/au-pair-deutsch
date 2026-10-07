@@ -9,7 +9,7 @@
 const fs = require('node:fs');
 const https = require('node:https');
 const path = require('node:path');
-const { parseLektion } = require('./parser.js');
+const { parseDokument } = require('./parser.js');
 
 function buildSpeechRequest(text) {
   return {
@@ -17,6 +17,15 @@ function buildSpeechRequest(text) {
     voice: { languageCode: 'de-DE', name: 'de-DE-Neural2-F' },
     audioConfig: { audioEncoding: 'MP3' },
   };
+}
+
+/**
+ * Wiederholungsseiten haben bewusst kein Audio: dort wird geschrieben und
+ * erkannt, gehört wird in den Lektionen. Ohne diese Weiche liefe der Aufruf
+ * mit leerem Text gegen die API.
+ */
+function brauchtAudio(dokument) {
+  return dokument.art === 'lektion';
 }
 
 function rufeTtsApiAuf(text, apiKey) {
@@ -51,7 +60,9 @@ async function main() {
   const dateien = fs.readdirSync(lektionenDir).filter((f) => f.endsWith('.md')).sort();
 
   for (const datei of dateien) {
-    const lektion = parseLektion(path.join(lektionenDir, datei));
+    const dokument = parseDokument(path.join(lektionenDir, datei));
+    if (!brauchtAudio(dokument)) continue;
+    const lektion = dokument;
     const zielOrdner = path.join(__dirname, '..', 'audio', String(lektion.id));
 
     // Hörübung plus je eine Datei pro Nachsprech-Satz, damit einzelne Sätze
@@ -88,4 +99,4 @@ async function main() {
 
 if (require.main === module) main().catch((err) => { console.error(err); process.exit(1); });
 
-module.exports = { buildSpeechRequest };
+module.exports = { buildSpeechRequest, brauchtAudio };

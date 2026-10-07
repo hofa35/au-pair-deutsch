@@ -1,7 +1,11 @@
 // scripts/pruefstand.js
+//
+// Prüft die Inhaltsdateien auf Vollständigkeit, bevor gebaut wird. Lektionen
+// und Wiederholungen haben verschiedene Pflichtteile, deshalb gibt es zwei
+// Prüfungen und einen Verteiler, der nach "art" entscheidet.
 const fs = require('node:fs');
 const path = require('node:path');
-const { parseLektion } = require('./parser.js');
+const { parseDokument } = require('./parser.js');
 
 function validateLektion(lektion) {
   const errors = [];
@@ -29,14 +33,51 @@ function validateLektion(lektion) {
   return { valid: errors.length === 0, errors };
 }
 
+// Unter drei Aufgaben lohnt die eigene Seite nicht – dann kann der Stoff
+// genauso gut in die nächste Lektion. Die Zahl ist eine Setzung, sie hält
+// nur die Untergrenze fest.
+const MINDESTENS_AUFGABEN = 3;
+
+function validateWiederholung(wiederholung) {
+  const errors = [];
+  if (!wiederholung.nr) errors.push('nr fehlt');
+  if (!wiederholung.titel) errors.push('titel fehlt');
+  if (!wiederholung.umfasst) errors.push('umfasst fehlt');
+  // Die Einleitung sagt, was auf der Seite passiert. Zweisprachig, weil
+  // sonst genau die Lernende aussteigt, die die Wiederholung braucht.
+  if (!wiederholung.einstiegDe) errors.push('einstiegDe fehlt');
+  if (!wiederholung.einstiegEn) errors.push('einstiegEn fehlt');
+
+  const aufgaben = wiederholung.aufgaben || [];
+  if (aufgaben.length < MINDESTENS_AUFGABEN) {
+    errors.push(`zu wenige Aufgaben (${aufgaben.length}, mindestens ${MINDESTENS_AUFGABEN})`);
+  }
+  aufgaben.forEach((aufgabe, i) => {
+    const marke = `Aufgabe ${i + 1}`;
+    if (!aufgabe.titel) errors.push(`${marke}: titel fehlt`);
+    if (!aufgabe.text) errors.push(`${marke}: aufgabentext fehlt`);
+    // Ohne Lösung kann niemand allein lernen: es gibt hier keine Lehrkraft,
+    // die hinterher drübergeht.
+    if (!aufgabe.loesung) errors.push(`${marke}: loesung fehlt`);
+  });
+
+  return { valid: errors.length === 0, errors };
+}
+
+function validateDokument(dokument) {
+  return dokument.art === 'wiederholung'
+    ? validateWiederholung(dokument)
+    : validateLektion(dokument);
+}
+
 function main() {
   const lektionenDir = path.join(__dirname, '..', 'lektionen');
   const dateien = fs.readdirSync(lektionenDir).filter((f) => f.endsWith('.md'));
   let hatFehler = false;
   for (const datei of dateien) {
     try {
-      const lektion = parseLektion(path.join(lektionenDir, datei));
-      const result = validateLektion(lektion);
+      const dokument = parseDokument(path.join(lektionenDir, datei));
+      const result = validateDokument(dokument);
       if (!result.valid) {
         hatFehler = true;
         console.error(`${datei}: ${result.errors.join(', ')}`);
@@ -53,4 +94,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { validateLektion };
+module.exports = { validateLektion, validateWiederholung, validateDokument };

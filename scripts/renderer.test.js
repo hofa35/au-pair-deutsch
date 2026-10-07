@@ -150,3 +150,86 @@ test('ohne Versionen bleiben die Verweise schlicht', () => {
   assert.match(html, /href="styles\.css"/);
   assert.match(html, /src="toggle\.js"/);
 });
+
+/* Wiederholungen in der Fußnavigation */
+
+const kette = [
+  { schluessel: 'lektion-1', nr: 1, titel: 'Ankommen' },
+  { schluessel: 'lektion-2', nr: 2, titel: 'Gastfamilie' },
+  { schluessel: 'wiederholung-1', nr: 1, titel: 'Wiederholung: Lektion 1 bis 2', umfasst: '1 bis 2', marke: 'Wiederholung 1' },
+  { schluessel: 'lektion-3', nr: 3, titel: 'Zimmer' },
+];
+const ketteGebaut = new Map([
+  ['lektion-1', { titel: 'Ankommen', dateiname: 'lektion-01.html' }],
+  ['lektion-2', { titel: 'Gastfamilie', dateiname: 'lektion-02.html' }],
+  ['wiederholung-1', { titel: 'Wiederholung: Lektion 1 bis 2', dateiname: 'wiederholung-01.html', marke: 'Wiederholung 1' }],
+  ['lektion-3', { titel: 'Zimmer', dateiname: 'lektion-03.html' }],
+]);
+
+// Zwei Lektionen hinter der Wiederholung: dort zeigt keine der beiden
+// Karten mehr auf sie, der Zweitverweis ist also der einzige Weg zurück.
+const langeKette = [...kette, { schluessel: 'lektion-4', nr: 4, titel: 'Tagesablauf' }];
+const langeKetteGebaut = new Map(ketteGebaut).set('lektion-4', {
+  titel: 'Tagesablauf',
+  dateiname: 'lektion-04.html',
+});
+const zweitverweis = {
+  dateiname: 'wiederholung-01.html',
+  beschriftung: 'Wiederholung: Lektion 1 bis 2',
+};
+
+test('nach der letzten Lektion vor einer Wiederholung führt Weiter dorthin', () => {
+  const nav = baueNavigation('lektion-2', kette, ketteGebaut);
+  assert.strictEqual(nav.naechste.dateiname, 'wiederholung-01.html');
+  const html = renderLektionHtml(beispielLektion, undefined, nav);
+  assert.match(html, /weiter-karte--vor" href="wiederholung-01\.html"/);
+  assert.match(html, /<span class="weiter-label">Wiederholung 1/);
+  assert.doesNotMatch(html, /weiter-label">Lektion 1</);
+});
+
+test('die Lektion nach der Wiederholung verweist zurück auf sie', () => {
+  const nav = baueNavigation('lektion-3', kette, ketteGebaut);
+  assert.strictEqual(nav.vorige.dateiname, 'wiederholung-01.html');
+});
+
+test('der Zweitverweis steht unter den Karten, nicht in ihnen', () => {
+  const nav = baueNavigation('lektion-4', langeKette, langeKetteGebaut);
+  nav.wiederholung = zweitverweis;
+  const html = renderLektionHtml(beispielLektion, undefined, nav);
+  assert.match(html, /<p class="weiter-nebenlink"><a href="wiederholung-01\.html">/);
+  assert.match(html, /Wiederholung: Lektion 1 bis 2/);
+  // Erst die Navigation, dann der Zweitverweis, dann der Seitenfuß.
+  assert.ok(html.indexOf('</nav>') < html.indexOf('weiter-nebenlink'));
+  assert.ok(html.indexOf('weiter-nebenlink') < html.indexOf('lektion-fuss'));
+});
+
+test('ohne Zweitverweis bleibt die Fußnavigation wie bisher', () => {
+  const html = renderLektionHtml(beispielLektion, undefined, baueNavigation('lektion-3', kette, ketteGebaut));
+  assert.doesNotMatch(html, /weiter-nebenlink/);
+});
+
+test('eine ungebaute Wiederholung erscheint als Ausblick mit ihrer Marke', () => {
+  const nurLektionen = new Map([['lektion-2', { titel: 'Gastfamilie', dateiname: 'lektion-02.html' }]]);
+  const nav = baueNavigation('lektion-2', kette, nurLektionen);
+  assert.strictEqual(nav.naechste, null);
+  assert.strictEqual(nav.ausblick.marke, 'Wiederholung 1');
+  const html = renderLektionHtml(beispielLektion, undefined, nav);
+  assert.match(html, /Wiederholung 1 · in Arbeit/);
+});
+
+test('direkt nach der Wiederholung entfaellt der Zweitverweis', () => {
+  // Lektion 3 liegt unmittelbar hinter der Wiederholung: die Zurück-Karte
+  // zeigt schon dorthin.
+  const nav = baueNavigation('lektion-3', kette, ketteGebaut);
+  nav.wiederholung = zweitverweis;
+  const html = renderLektionHtml(beispielLektion, undefined, nav);
+  assert.doesNotMatch(html, /weiter-nebenlink/);
+  assert.match(html, /weiter-karte--zurueck" href="wiederholung-01\.html"/);
+});
+
+test('eine Lektion weiter erscheint der Zweitverweis wieder', () => {
+  const nav = baueNavigation('lektion-4', langeKette, langeKetteGebaut);
+  nav.wiederholung = zweitverweis;
+  const html = renderLektionHtml(beispielLektion, undefined, nav);
+  assert.match(html, /weiter-nebenlink/);
+});

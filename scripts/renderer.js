@@ -24,35 +24,46 @@ const LAUTSPRECHER_ICON = `<svg width="20" height="20" viewBox="0 0 24 24" fill=
 
 const ZURUECK_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H6"/><path d="m12 19-7-7 7-7"/></svg>`;
 
+const WIEDERHOLEN_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4.5V9h4.5"/></svg>`;
+
 const VOR_ICON = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="m12 5 7 7-7 7"/></svg>`;
 
 /**
- * Sucht die Nachbarlektionen für die Fußnavigation.
+ * Sucht die Nachbarstationen für die Fußnavigation.
  *
- * Gesprungen wird immer zur nächsten bzw. vorherigen Lektion, die es
+ * Eine Station ist entweder eine Lektion oder eine Wiederholung. Die Kette
+ * baut build.js zusammen und liefert sie in Lernreihenfolge, die
+ * Wiederholungen sitzen dort also schon an ihrem Platz zwischen den
+ * Lektionen.
+ *
+ * Gesprungen wird immer zur nächsten bzw. vorherigen Station, die es
  * wirklich gibt. Lücken werden also übersprungen, damit niemand auf einer
  * toten Verknüpfung landet. Ist danach nichts mehr gebaut, steht aber noch
- * etwas in der Übersicht, wird die geplante Lektion als Ausblick gemeldet.
+ * etwas in der Kette, wird die geplante Station als Ausblick gemeldet.
  *
- * @param {number} nr  aktuelle Lektionsnummer
- * @param {Array} uebersicht  Inhalt von lektionen/uebersicht.json
- * @param {Map<number, {titel: string, dateiname: string}>} gebaut
+ * @param {number|string} aktuell  Schlüssel der aktuellen Station
+ * @param {Array} stationen  Lernreihenfolge, Einträge {schluessel?, nr, titel, marke?}
+ * @param {Map} gebaut  Schlüssel -> {titel, dateiname, marke?} der fertigen Seiten
  */
-function baueNavigation(nr, uebersicht, gebaut) {
-  const reihe = uebersicht.map((e) => e.nr);
-  const stelle = reihe.indexOf(nr);
+function schluesselVon(eintrag) {
+  return eintrag.schluessel !== undefined ? eintrag.schluessel : eintrag.nr;
+}
+
+function baueNavigation(aktuell, stationen, gebaut) {
+  const reihe = stationen.map(schluesselVon);
+  const stelle = reihe.indexOf(aktuell);
   if (stelle === -1) return { vorige: null, naechste: null, ausblick: null };
 
   const suche = (von, schritt) => {
-    for (let i = von; i >= 0 && i < reihe.length; i += schritt) {
+    for (let i = von; i >= 0 && i < stationen.length; i += schritt) {
       const treffer = gebaut.get(reihe[i]);
-      if (treffer) return { nr: reihe[i], ...treffer };
+      if (treffer) return { nr: stationen[i].nr, ...treffer };
     }
     return null;
   };
 
   const naechste = suche(stelle + 1, 1);
-  const naechsterEintrag = uebersicht[stelle + 1];
+  const naechsterEintrag = stationen[stelle + 1];
 
   return {
     vorige: suche(stelle - 1, -1),
@@ -61,35 +72,58 @@ function baueNavigation(nr, uebersicht, gebaut) {
   };
 }
 
+/**
+ * Beschriftung einer Navigationskarte. Lektionen werden durchgezählt,
+ * Wiederholungen bringen ihre eigene Marke mit ("Wiederholung 1").
+ */
+function marke(eintrag) {
+  return eintrag.marke || `Lektion ${eintrag.nr}`;
+}
+
 function renderNavigation(navigation) {
   if (!navigation) return '';
-  const { vorige, naechste, ausblick } = navigation;
+  const { vorige, naechste, ausblick, wiederholung } = navigation;
   const teile = [];
 
   if (vorige) {
     teile.push(`  <a class="weiter-karte weiter-karte--zurueck" href="${vorige.dateiname}">
-    <span class="weiter-label">${ZURUECK_ICON}Lektion ${vorige.nr}</span>
+    <span class="weiter-label">${ZURUECK_ICON}${marke(vorige)}</span>
     <span class="weiter-titel">${vorige.titel}</span>
   </a>`);
   }
 
   if (naechste) {
     teile.push(`  <a class="weiter-karte weiter-karte--vor" href="${naechste.dateiname}">
-    <span class="weiter-label">Lektion ${naechste.nr}${VOR_ICON}</span>
+    <span class="weiter-label">${marke(naechste)}${VOR_ICON}</span>
     <span class="weiter-titel">${naechste.titel}</span>
   </a>`);
   } else if (ausblick) {
     teile.push(`  <div class="weiter-karte weiter-karte--vor weiter-karte--bald">
-    <span class="weiter-label">Lektion ${ausblick.nr} · in Arbeit</span>
+    <span class="weiter-label">${marke(ausblick)} · in Arbeit</span>
     <span class="weiter-titel">${ausblick.titel}</span>
   </div>`);
   }
 
-  if (teile.length === 0) return '';
-  return `<nav class="weiter" aria-label="Weitere Lektionen">
+  // Zweitrangiger Verweis auf die letzte Wiederholung, die auf dem Weg
+  // hierhin schon vorgekommen ist. Bewusst kleiner als die beiden Karten:
+  // der Weg nach vorn bleibt die Hauptsache, die Wiederholung ist ein
+  // Angebot für den Fall, dass etwas nicht mehr sitzt.
+  //
+  // Auf der Lektion direkt nach einer Wiederholung entfällt er: dort zeigt
+  // schon die Zurück-Karte dorthin, zweimal dasselbe Ziel wäre nur Lärm.
+  const schonInDenKarten = [vorige, naechste].some(
+    (karte) => karte && wiederholung && karte.dateiname === wiederholung.dateiname
+  );
+  const nebenlink = wiederholung && !schonInDenKarten
+    ? `<p class="weiter-nebenlink"><a href="${wiederholung.dateiname}">${WIEDERHOLEN_ICON}<span>${wiederholung.beschriftung}</span></a></p>
+`
+    : '';
+
+  if (teile.length === 0) return nebenlink;
+  return `<nav class="weiter" aria-label="Weiter im Kurs">
 ${teile.join('\n')}
 </nav>
-`;
+${nebenlink}`;
 }
 
 /**
@@ -243,4 +277,11 @@ ${renderNavigation(navigation)}<p class="lektion-fuss"><a class="zurueck" href="
 </html>`;
 }
 
-module.exports = { renderLektionHtml, baueNavigation };
+module.exports = {
+  renderLektionHtml,
+  baueNavigation,
+  renderNavigation,
+  renderLoesung,
+  mitVersion,
+  ZURUECK_ICON,
+};

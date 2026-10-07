@@ -81,3 +81,40 @@ Sätze räumt es selbst auf.
 Die Startseite verlinkt automatisch alle Lektionen, für die eine
 Markdown-Datei existiert. Die übrigen Karten bleiben als Vorschau stehen und
 sind mit „in Arbeit" gekennzeichnet.
+
+## Wiederholungen
+
+Nach mehreren Lektionen liegt eine Wiederholung im Lernweg: eine eigene
+Seite mit Aufgaben quer durch den bisherigen Stoff. Kein neuer Stoff, kein
+Audio, keine Wortschatzliste.
+
+Takt: die erste Wiederholung nach Lektion 4, danach alle drei Lektionen,
+also nach 7, 10 und 13. Lektion 15 bleibt der Gesamtrückblick.
+
+Zwei Dateien gehören dazu:
+
+    lektionen/wiederholungen.json    Plan: Nummer, "nach" welcher Lektion,
+                                     Umfang, Titel, Akzentfarbe, Kurztext
+    lektionen/wiederholung-01.md     Inhalt, erkannt an "typ: wiederholung"
+
+Aufbau der Inhaltsdatei:
+
+    ## Einstieg Deutsch              zweisprachige Einleitung, Pflicht
+    ## Einstieg Englisch
+    ## Aufgabe: <Titel>              beliebig viele, nummeriert wird beim Bauen
+    ### Lösung                       pro Aufgabe, zugeklappt
+    ### Beispiellösung               Variante für freie Aufgaben
+    ## Rückmeldung                   freiwillig, Rückkanal an uns
+
+Der Prüfstand misst Wiederholungen an eigenen Regeln: mindestens drei
+Aufgaben, jede mit Lösung, Einleitung in beiden Sprachen. Wortschatz und
+Hörtext werden hier nicht verlangt.
+
+Die Lernreihenfolge baut `scripts/stationen.js` aus beiden JSON-Dateien.
+Daraus entsteht die Fußnavigation: nach Lektion 4 führt "Weiter" zur
+Wiederholung, erst von dort geht es zu Lektion 5. Jede Lektion nach einer
+Wiederholung bekommt zusätzlich einen kleinen Zweitverweis zurück auf sie.
+
+Inhaltliche Regel für die nächsten Wiederholungen: nicht nur die letzten
+drei Lektionen abfragen, sondern eine Aufgabe auf noch früheren Stoff
+richten. Sonst fällt der Anfang nach einigen Wochen trotzdem heraus.

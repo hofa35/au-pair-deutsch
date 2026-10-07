@@ -70,3 +70,48 @@ test('fehlende freiwillige Abschnitte ergeben leere Werte', () => {
   assert.strictEqual(lektion.beispielloesung, '');
   fs.rmSync(knapp);
 });
+
+const { parseWiederholung, parseDokument } = require('./parser.js');
+
+const wiederholungsPfad = path.join(__dirname, 'fixtures', 'test-wiederholung.md');
+
+test('parseWiederholung liest Frontmatter und zweisprachige Einleitung', () => {
+  const w = parseWiederholung(wiederholungsPfad);
+  assert.strictEqual(w.art, 'wiederholung');
+  assert.strictEqual(w.nr, 7);
+  assert.strictEqual(w.titel, 'Testwiederholung');
+  assert.strictEqual(w.umfasst, '1 bis 2');
+  assert.strictEqual(w.einstiegDe, 'Deutsche Einleitung.');
+  assert.strictEqual(w.einstiegEn, 'English introduction.');
+  assert.strictEqual(w.rueckmeldung, 'Sag, was schwer war.');
+});
+
+test('parseWiederholung liest beliebig viele Aufgaben in Dateireihenfolge', () => {
+  const w = parseWiederholung(wiederholungsPfad);
+  assert.deepStrictEqual(
+    w.aufgaben.map((a) => a.titel),
+    ['Erste Testaufgabe', 'Zweite Testaufgabe', 'Freie Testaufgabe']
+  );
+  assert.strictEqual(w.aufgaben[0].text, 'Mach das Erste.');
+  assert.strictEqual(w.aufgaben[0].loesung, 'Erste Lösung.');
+});
+
+test('die Lösung steckt nicht mehr im Aufgabentext', () => {
+  const w = parseWiederholung(wiederholungsPfad);
+  assert.doesNotMatch(w.aufgaben[0].text, /Lösung/);
+});
+
+test('Lösung und Beispiellösung werden unterschieden', () => {
+  const w = parseWiederholung(wiederholungsPfad);
+  assert.strictEqual(w.aufgaben[1].loesungArt, 'Lösung');
+  assert.strictEqual(w.aufgaben[2].loesungArt, 'Beispiellösung');
+  assert.strictEqual(w.aufgaben[2].loesung, 'So könnte es aussehen.');
+});
+
+test('parseDokument erkennt die Art an der Frontmatter, nicht am Dateinamen', () => {
+  assert.strictEqual(parseDokument(wiederholungsPfad).art, 'wiederholung');
+  assert.strictEqual(
+    parseDokument(path.join(__dirname, 'fixtures', 'test-lektion.md')).art,
+    'lektion'
+  );
+});

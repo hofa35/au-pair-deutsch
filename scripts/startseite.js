@@ -3,6 +3,10 @@
 // Baut die Startseite: Mira-Hero, kurze Anleitung, Raster mit allen
 // 15 Lektionskarten. Karten ohne fertige Lektionsdatei werden sichtbar,
 // aber nicht verlinkt – so sieht man von Anfang an, wohin der Kurs geht.
+//
+// Zwischen den Lektionskarten sitzen die Wiederholungen. Sie liegen quer
+// über die ganze Breite des Rasters, damit man den Takt des Kurses sieht:
+// vier Lektionen, dann einmal zurückschauen, dann weiter.
 
 function escapeHtml(text) {
   return String(text)
@@ -15,6 +19,32 @@ function escapeHtml(text) {
 const SPRECHBLASE_ICON = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.9 9.9 0 0 1-4-.8L3 21l1.9-4.6A8.4 8.4 0 0 1 12 3a8.4 8.4 0 0 1 9 8.5Z"/></svg>`;
 
 const PFEIL_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h13"/><path d="m12 5 7 7-7 7"/></svg>`;
+
+const WIEDERHOLEN_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4.5V9h4.5"/></svg>`;
+
+/**
+ * Wiederholungsband zwischen zwei Lektionskarten.
+ *
+ * @param {object} plan  Eintrag aus lektionen/wiederholungen.json, bei
+ *   fertigen Seiten um titel und dateiname ergänzt.
+ */
+function renderWiederholungsKarte(plan) {
+  const fertig = Boolean(plan.dateiname);
+  const inneres = `
+  <span class="wkarte-marke" style="background:${plan.akzent}">${WIEDERHOLEN_ICON}Wiederholung ${plan.nr}</span>
+  <span class="wkarte-text">
+    <span class="wkarte-titel">${escapeHtml(plan.titel)}</span>
+    <span class="wkarte-info">${escapeHtml(plan.info || '')}</span>
+  </span>
+  ${fertig ? `<span class="karte-pfeil">${PFEIL_ICON}</span>` : '<span class="karte-status">in Arbeit</span>'}`;
+
+  if (fertig) {
+    return `<li class="zwischenstation"><a class="karte karte--wiederholung" href="${plan.dateiname}">${inneres}
+</a></li>`;
+  }
+  return `<li class="zwischenstation"><div class="karte karte--wiederholung karte--bald" aria-disabled="true">${inneres}
+</div></li>`;
+}
 
 const SCHRITTE = [
   'Lies den Dialog laut mit. Sprechen üben ist wichtiger als alles zu verstehen.',
@@ -54,20 +84,36 @@ function renderKarte(eintrag, lektionsDatei, istErste) {
  * @param {{css?: string}} [versionen]  Prüfsumme des Stylesheets, damit
  *   Browser nach einer Änderung nicht am alten Zwischenspeicher hängen
  *   bleiben. Siehe mitVersion() in renderer.js.
+ * @param {Array} [wiederholungen]  Wiederholungsplan, bei fertigen Seiten
+ *   um dateiname ergänzt. Ohne Angabe erscheint keine.
  */
-function renderStartseiteHtml(uebersicht, gebaut, versionen = {}) {
+function renderStartseiteHtml(uebersicht, gebaut, versionen = {}, wiederholungen = []) {
   const stylesheet = versionen.css ? `styles.css?v=${versionen.css}` : 'styles.css';
   const ersteFertige = uebersicht.find((e) => gebaut.has(e.nr));
   const anzahlFertig = gebaut.size;
 
-  const karten = uebersicht
-    .map((eintrag, index) => {
-      const lektion = gebaut.get(eintrag.nr);
-      // Titel aus der Lektionsdatei hat Vorrang, die Übersicht ist nur Vorschau.
-      const zusammengefuehrt = lektion ? { ...eintrag, titel: lektion.titel } : eintrag;
-      return renderKarte(zusammengefuehrt, lektion && lektion.dateiname, index === 0);
-    })
-    .join('\n');
+  // Wiederholungen hinter der Lektion einsortieren, nach der sie stehen.
+  const planNach = new Map();
+  for (const plan of wiederholungen) {
+    if (!planNach.has(plan.nach)) planNach.set(plan.nach, []);
+    planNach.get(plan.nach).push(plan);
+  }
+
+  const kartenTeile = [];
+  uebersicht.forEach((eintrag, index) => {
+    const lektion = gebaut.get(eintrag.nr);
+    // Titel aus der Lektionsdatei hat Vorrang, die Übersicht ist nur Vorschau.
+    const zusammengefuehrt = lektion ? { ...eintrag, titel: lektion.titel } : eintrag;
+    kartenTeile.push(renderKarte(zusammengefuehrt, lektion && lektion.dateiname, index === 0));
+    for (const plan of planNach.get(eintrag.nr) || []) {
+      kartenTeile.push(renderWiederholungsKarte(plan));
+    }
+  });
+  const karten = kartenTeile.join('\n');
+
+  const wiederholungsHinweis = wiederholungen.length
+    ? ` Dazwischen liegen ${wiederholungen.length} Wiederholungen.`
+    : '';
 
   const schritte = SCHRITTE.map(
     (text, i) => `<li><span class="schritt-nummer">${i + 1}</span><span>${escapeHtml(text)}</span></li>`
@@ -120,7 +166,7 @@ ${schritte}
 <section class="uebersicht" id="lektionen">
   <div class="uebersicht-kopf">
     <h2>Die 15 Lektionen</h2>
-    <p class="uebersicht-stand">${anzahlFertig} von ${uebersicht.length} ${anzahlFertig === 1 ? 'ist fertig' : 'sind fertig'}, der Rest kommt nach und nach.</p>
+    <p class="uebersicht-stand">${anzahlFertig} von ${uebersicht.length} ${anzahlFertig === 1 ? 'ist fertig' : 'sind fertig'}, der Rest kommt nach und nach.${wiederholungsHinweis}</p>
   </div>
   <ul class="karten">
 ${karten}
@@ -143,4 +189,4 @@ ${karten}
 </html>`;
 }
 
-module.exports = { renderStartseiteHtml, escapeHtml };
+module.exports = { renderStartseiteHtml, renderWiederholungsKarte, escapeHtml };

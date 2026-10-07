@@ -2,10 +2,17 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const crypto = require('node:crypto');
-const { parseLektion } = require('./parser.js');
-const { validateLektion } = require('./pruefstand.js');
+const { parseDokument } = require('./parser.js');
+const { validateDokument } = require('./pruefstand.js');
 const { renderLektionHtml, baueNavigation } = require('./renderer.js');
+const { renderWiederholungHtml } = require('./wiederholung.js');
 const { renderStartseiteHtml } = require('./startseite.js');
+const {
+  schluesselLektion,
+  schluesselWdh,
+  baueStationen,
+  letzteWiederholungVor,
+} = require('./stationen.js');
 
 function kurzpruefsumme(datei) {
   return crypto.createHash('sha1').update(fs.readFileSync(datei)).digest('hex').slice(0, 10);
@@ -13,6 +20,10 @@ function kurzpruefsumme(datei) {
 
 function dateinameFuer(id) {
   return `lektion-${String(id).padStart(2, '0')}.html`;
+}
+
+function wdhDateinameFuer(nr) {
+  return `wiederholung-${String(nr).padStart(2, '0')}.html`;
 }
 
 function main() {
@@ -45,24 +56,56 @@ function main() {
   );
   const uebersichtNachNr = new Map(uebersicht.map((e) => [e.nr, e]));
 
-  // Erst alle Lektionen einlesen und prüfen. Die Fußnavigation braucht die
-  // Nachbarn, deshalb muss der Bestand vollständig sein, bevor gerendert wird.
+  const wdhPlanPfad = path.join(lektionenDir, 'wiederholungen.json');
+  const wiederholungsplan = fs.existsSync(wdhPlanPfad)
+    ? JSON.parse(fs.readFileSync(wdhPlanPfad, 'utf8'))
+    : [];
+  const planNachNr = new Map(wiederholungsplan.map((p) => [p.nr, p]));
+
+  // Erst alles einlesen und prüfen. Die Fußnavigation braucht die Nachbarn,
+  // deshalb muss der Bestand vollständig sein, bevor gerendert wird.
   const dateien = fs.readdirSync(lektionenDir).filter((f) => f.endsWith('.md'));
   const lektionen = [];
+  const wiederholungen = [];
 
   for (const datei of dateien) {
-    const lektion = parseLektion(path.join(lektionenDir, datei));
-    const result = validateLektion(lektion);
+    const dokument = parseDokument(path.join(lektionenDir, datei));
+    const result = validateDokument(dokument);
     if (!result.valid) {
       throw new Error(`${datei} ist ungültig: ${result.errors.join(', ')}`);
     }
-    lektionen.push(lektion);
+    if (dokument.art === 'wiederholung') {
+      if (!planNachNr.has(dokument.nr)) {
+        console.warn(
+          `Warnung: ${datei} fehlt in wiederholungen.json, die Seite wird gebaut, erscheint aber nicht im Lernweg`
+        );
+      }
+      wiederholungen.push(dokument);
+    } else {
+      lektionen.push(dokument);
+    }
   }
 
   lektionen.sort((a, b) => a.id - b.id);
-  const gebaut = new Map(
-    lektionen.map((l) => [l.id, { titel: l.titel, dateiname: dateinameFuer(l.id) }])
+  wiederholungen.sort((a, b) => a.nr - b.nr);
+
+  const stationen = baueStationen(uebersicht, wiederholungsplan, (text) =>
+    console.warn(`Warnung: ${text}`)
   );
+  const gebaut = new Map();
+  for (const lektion of lektionen) {
+    gebaut.set(schluesselLektion(lektion.id), {
+      titel: lektion.titel,
+      dateiname: dateinameFuer(lektion.id),
+    });
+  }
+  for (const wdh of wiederholungen) {
+    gebaut.set(schluesselWdh(wdh.nr), {
+      titel: wdh.titel,
+      dateiname: wdhDateinameFuer(wdh.nr),
+      marke: `Wiederholung ${wdh.nr}`,
+    });
+  }
 
   for (const lektion of lektionen) {
     // Alle Audiodateien der Lektion mitnehmen: Hörübung und Nachsprech-Sätze.
@@ -81,18 +124,48 @@ function main() {
       }
     }
 
+    const schluessel = schluesselLektion(lektion.id);
+    const navigation = baueNavigation(schluessel, stationen, gebaut);
+    navigation.wiederholung = letzteWiederholungVor(schluessel, stationen, gebaut);
+
     const html = renderLektionHtml(
       lektion,
       uebersichtNachNr.get(lektion.id),
-      baueNavigation(lektion.id, uebersicht, gebaut),
+      navigation,
       versionen
     );
     fs.writeFileSync(path.join(distDir, dateinameFuer(lektion.id)), html);
   }
 
-  fs.writeFileSync(path.join(distDir, 'index.html'), renderStartseiteHtml(uebersicht, gebaut, versionen));
+  // Wiederholungsseiten brauchen kein Audio: hier wird geschrieben und
+  // erkannt, gehört wird in den Lektionen.
+  for (const wdh of wiederholungen) {
+    const html = renderWiederholungHtml(
+      wdh,
+      planNachNr.get(wdh.nr),
+      baueNavigation(schluesselWdh(wdh.nr), stationen, gebaut),
+      versionen
+    );
+    fs.writeFileSync(path.join(distDir, wdhDateinameFuer(wdh.nr)), html);
+  }
 
-  console.log(`Build fertig: ${gebaut.size} von ${uebersicht.length} Lektion(en) in dist/`);
+  const gebauteLektionen = new Map(
+    lektionen.map((l) => [l.id, { titel: l.titel, dateiname: dateinameFuer(l.id) }])
+  );
+  const wdhFuerStartseite = wiederholungsplan.map((plan) => {
+    const fertig = gebaut.get(schluesselWdh(plan.nr));
+    return fertig ? { ...plan, titel: fertig.titel, dateiname: fertig.dateiname } : plan;
+  });
+
+  fs.writeFileSync(
+    path.join(distDir, 'index.html'),
+    renderStartseiteHtml(uebersicht, gebauteLektionen, versionen, wdhFuerStartseite)
+  );
+
+  console.log(
+    `Build fertig: ${lektionen.length} von ${uebersicht.length} Lektion(en) und ` +
+      `${wiederholungen.length} von ${wiederholungsplan.length} Wiederholung(en) in dist/`
+  );
 }
 
 main();

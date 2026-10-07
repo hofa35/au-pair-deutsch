@@ -1,0 +1,6 @@
+[
+  { "nr": 1, "nach": 4,  "umfasst": "1 bis 4",   "titel": "Wiederholung: Lektion 1 bis 4",   "akzent": "#E8E6FF", "info": "Fünf Aufgaben quer durch die ersten vier Lektionen. Kein Audio, kein neuer Stoff." },
+  { "nr": 2, "nach": 7,  "umfasst": "5 bis 7",   "titel": "Wiederholung: Lektion 5 bis 7",   "akzent": "#D9F0E8", "info": "Uhrzeit, Essen, Einkaufen – gemischt, dazu ein Rückgriff auf die ersten Lektionen." },
+  { "nr": 3, "nach": 10, "umfasst": "8 bis 10",  "titel": "Wiederholung: Lektion 8 bis 10",  "akzent": "#E2F0FF", "info": "Kinderbetreuung, Spielen, Wege – gemischt, dazu ein Rückgriff auf früheren Stoff." },
+  { "nr": 4, "nach": 13, "umfasst": "11 bis 13", "titel": "Wiederholung: Lektion 11 bis 13", "akzent": "#FFE4EC", "info": "Gespräche, Notfälle, Termine – gemischt, dazu ein Rückgriff auf früheren Stoff." }
+]
