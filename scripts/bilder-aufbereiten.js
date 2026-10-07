@@ -84,6 +84,22 @@ const RETUSCHEN = {
       grund: 'Giftnotruf-Nummer einer anderen Region',
     },
   ],
+  // Die Überschrift des Tippkastens war falsch geschrieben
+  // ("Konflictklärung" statt "Konfliktklärung"). Ein Rechtschreibfehler auf
+  // einer Seite, die Deutsch beibringt, untergräbt genau das. Übrig bleiben
+  // die Glühbirne und die drei nummerierten Tipps, die für sich stehen.
+  14: [
+    {
+      links: 108,
+      rechts: 342,
+      obenLinks: 413,
+      obenRechts: 413,
+      untenLinks: 442,
+      untenRechts: 442,
+      farbe: '0xDAE6C4', // aus dem Tippkasten ausgelesen
+      grund: 'Rechtschreibfehler in der Bildunterschrift',
+    },
+  ],
 };
 
 const RETUSCHE_STREIFEN = 15; // schmaler heißt weniger Treppe an den Kanten
