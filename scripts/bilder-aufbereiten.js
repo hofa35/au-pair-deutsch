@@ -40,6 +40,37 @@ const ZUORDNUNG = {
   9: 9, 10: 7, 11: 14, 12: 11, 13: 13, 14: 15, 15: 12,
 };
 
+/**
+ * Retuschen: Stellen, die aus den Rohbildern verschwinden müssen, bevor die
+ * Seite öffentlich ausgeliefert wird.
+ *
+ * Lektion 7 trug auf dem Ladenschild das Logo einer echten Supermarktkette.
+ * Ein fremdes Markenzeichen auf einer offenen Lernseite ist weder nötig noch
+ * sauber, also wird die Zeile mit der Schildfarbe überdeckt. Übrig bleibt
+ * "SUPERMARKT", und das genügt für die Szene.
+ *
+ * Das Schild hängt schräg. Ein waagerechter Kasten würde oben die Buchstaben
+ * anschneiden und unten in den Rahmen laufen, deshalb wird die Fläche aus
+ * schmalen Streifen zusammengesetzt, die der Neigung folgen. Alle Angaben in
+ * Kartenkoordinaten, also nach dem Verkleinern auf 720x480.
+ */
+const RETUSCHEN = {
+  7: [
+    {
+      links: 511,
+      rechts: 686,
+      obenLinks: 68,
+      obenRechts: 52,
+      untenLinks: 100,
+      untenRechts: 85,
+      farbe: '0xF7F2E6', // aus dem Schild ausgelesen
+      grund: 'Markenlogo einer echten Supermarktkette',
+    },
+  ],
+};
+
+const RETUSCHE_STREIFEN = 15; // schmaler heißt weniger Treppe an den Kanten
+
 const KARTEN_BREITE = 720;
 const KARTEN_HOEHE = 480;
 const MIRA_BREITE = 640;
@@ -49,6 +80,27 @@ function ffmpeg(args) {
   return execFileSync('ffmpeg', ['-v', 'error', '-y', ...args], {
     maxBuffer: 1024 * 1024 * 256,
   });
+}
+
+/**
+ * Baut aus einer schrägen Fläche eine Kette waagerechter Kästen.
+ *
+ * Für die Oberkante zählt die linke Streifenkante, für die Unterkante die
+ * rechte. So bleibt jeder Streifen vollständig innerhalb der Fläche, die
+ * überdeckt werden darf, statt über ihren Rand hinauszulaufen.
+ */
+function retuscheFilter(flaeche) {
+  const { links, rechts, obenLinks, obenRechts, untenLinks, untenRechts, farbe } = flaeche;
+  const zwischen = (a, b, x) => a + ((b - a) * (x - links)) / (rechts - links);
+
+  const teile = [];
+  for (let x = links; x < rechts; x += RETUSCHE_STREIFEN) {
+    const breite = Math.min(RETUSCHE_STREIFEN, rechts - x);
+    const oben = Math.floor(zwischen(obenLinks, obenRechts, x));
+    const unten = Math.floor(zwischen(untenLinks, untenRechts, x + breite));
+    teile.push(`drawbox=x=${x}:y=${oben}:w=${breite}:h=${unten - oben}:color=${farbe}:t=fill`);
+  }
+  return teile.join(',');
 }
 
 function masse(datei) {
@@ -75,14 +127,22 @@ function karten() {
       continue;
     }
     const ziel = path.join(ZIEL, `lektion-${String(lektionsNr).padStart(2, '0')}.webp`);
+    const retuschen = RETUSCHEN[lektionsNr] || [];
+    const filter = [
+      `scale=${KARTEN_BREITE}:${KARTEN_HOEHE}:flags=lanczos`,
+      ...retuschen.map(retuscheFilter),
+    ].join(',');
     ffmpeg([
       '-i', quelle,
-      '-vf', `scale=${KARTEN_BREITE}:${KARTEN_HOEHE}:flags=lanczos`,
+      '-vf', filter,
       '-c:v', 'libwebp', '-lossless', '0', '-q:v', '76', '-compression_level', '6',
       '-frames:v', '1',
       ziel,
     ]);
-    console.log(`  ${path.basename(ziel)}  ${kb(quelle)} kB -> ${kb(ziel)} kB`);
+    const nachtrag = retuschen.length
+      ? `  (retuschiert: ${retuschen.map((r) => r.grund).join(', ')})`
+      : '';
+    console.log(`  ${path.basename(ziel)}  ${kb(quelle)} kB -> ${kb(ziel)} kB${nachtrag}`);
   }
 }
 
