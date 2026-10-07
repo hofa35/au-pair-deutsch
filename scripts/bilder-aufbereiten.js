@@ -67,6 +67,23 @@ const RETUSCHEN = {
       grund: 'Markenlogo einer echten Supermarktkette',
     },
   ],
+  // Das Notfallplakat nannte als dritte Nummer den Giftnotruf Berlin.
+  // Für ein Au-Pair außerhalb Berlins ist das die falsche Stelle, und auf
+  // genau dieser Seite darf nichts Falsches stehen. Übrig bleiben 112 und
+  // 116 117, die bundesweit gelten. Die Fläche ist hier rechteckig, oben
+  // und unten also derselbe Wert.
+  12: [
+    {
+      links: 326,
+      rechts: 470,
+      obenLinks: 185,
+      obenRechts: 185,
+      untenLinks: 214,
+      untenRechts: 214,
+      farbe: '0xFDF6E5', // aus dem Plakat ausgelesen
+      grund: 'Giftnotruf-Nummer einer anderen Region',
+    },
+  ],
 };
 
 const RETUSCHE_STREIFEN = 15; // schmaler heißt weniger Treppe an den Kanten
