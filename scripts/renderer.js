@@ -219,7 +219,7 @@ function renderLektionHtml(lektion, eintrag, navigation, versionen = {}) {
 <title>${lektion.titel} – Deutsch für Au-Pairs</title>
 <link rel="stylesheet" href="${mitVersion('styles.css', versionen.css)}">
 </head>
-<body>
+<body data-station="lektion-${lektion.id}">
 <header class="kopfzeile">
   <a class="zurueck" href="index.html">${ZURUECK_ICON}<span>Alle Lektionen</span></a>
   <span class="kopf-hinweis">Lektion ${lektion.id}</span>
@@ -273,6 +273,7 @@ ${renderNavigation(navigation)}<p class="lektion-fuss"><a class="zurueck" href="
 
 </main>
 <script src="${mitVersion('toggle.js', versionen.js)}"></script>
+<script src="${mitVersion('fortschritt.js', versionen.fortschritt)}"></script>
 </body>
 </html>`;
 }
@@ -284,4 +285,5 @@ module.exports = {
   renderLoesung,
   mitVersion,
   ZURUECK_ICON,
+  LAUTSPRECHER_ICON,
 };

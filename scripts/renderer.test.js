@@ -233,3 +233,9 @@ test('eine Lektion weiter erscheint der Zweitverweis wieder', () => {
   const html = renderLektionHtml(beispielLektion, undefined, nav);
   assert.match(html, /weiter-nebenlink/);
 });
+
+test('eine Lektionsseite meldet sich als Station und lädt den Fortschritt', () => {
+  const html = renderLektionHtml(beispielLektion, null, null, { fortschritt: 'ddd' });
+  assert.match(html, /<body data-station="lektion-1">/);
+  assert.match(html, /src="fortschritt\.js\?v=ddd"/);
+});

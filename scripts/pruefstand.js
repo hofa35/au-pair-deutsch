@@ -38,6 +38,11 @@ function validateLektion(lektion) {
 // nur die Untergrenze fest.
 const MINDESTENS_AUFGABEN = 3;
 
+// Eine gesprochene Gratulation, die länger wird, hört niemand zu Ende, und
+// jede Sekunde Ton kostet bei der Erzeugung. Die Zahl ist eine Setzung, sie
+// hält nur die Obergrenze fest.
+const HOECHSTLAENGE_GESPROCHEN = 500;
+
 function validateWiederholung(wiederholung) {
   const errors = [];
   if (!wiederholung.nr) errors.push('nr fehlt');
@@ -64,10 +69,31 @@ function validateWiederholung(wiederholung) {
   return { valid: errors.length === 0, errors };
 }
 
+function validateAbschluss(abschluss) {
+  const errors = [];
+  if (!abschluss.titel) errors.push('titel fehlt');
+  if (!abschluss.gratulationDe) errors.push('gratulationDe fehlt');
+  if (!abschluss.gratulationEn) errors.push('gratulationEn fehlt');
+  if (!abschluss.gesprochen) errors.push('gesprochen fehlt');
+  // Der Hinweis auf der Urkunde ist Pflicht, und zwar in beiden Sprachen:
+  // wer die Bescheinigung vorgelegt bekommt, muss lesen können, was sie ist
+  // und was sie nicht ist.
+  if (!abschluss.bescheinigungDe) errors.push('bescheinigungDe fehlt');
+  if (!abschluss.bescheinigungEn) errors.push('bescheinigungEn fehlt');
+
+  if (abschluss.gesprochen && abschluss.gesprochen.length > HOECHSTLAENGE_GESPROCHEN) {
+    errors.push(
+      `gesprochen ist zu lang (${abschluss.gesprochen.length} Zeichen, höchstens ${HOECHSTLAENGE_GESPROCHEN})`
+    );
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 function validateDokument(dokument) {
-  return dokument.art === 'wiederholung'
-    ? validateWiederholung(dokument)
-    : validateLektion(dokument);
+  if (dokument.art === 'wiederholung') return validateWiederholung(dokument);
+  if (dokument.art === 'abschluss') return validateAbschluss(dokument);
+  return validateLektion(dokument);
 }
 
 function main() {
@@ -94,4 +120,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { validateLektion, validateWiederholung, validateDokument };
+module.exports = { validateLektion, validateWiederholung, validateAbschluss, validateDokument };

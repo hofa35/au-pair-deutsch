@@ -1122,3 +1122,336 @@ a.karte--wiederholung:hover {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* ---------- Abschlussseite ---------- */
+
+.lektion--abschluss {
+  position: relative;
+}
+
+.abschluss-kopf {
+  display: grid;
+  grid-template-columns: minmax(0, 160px) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: end;
+  margin-bottom: 2rem;
+}
+
+/* Hier steht heute ein Standbild. Falls später ein Video kommt, ersetzt es
+   genau das Kind dieses Behälters – die Maße bleiben dieselben. */
+.abschluss-bild img {
+  width: 100%;
+  height: auto;
+}
+
+.abschluss-gruss h1 {
+  margin: 0.2rem 0 0.6rem;
+}
+
+.abschluss-stand {
+  margin: 0;
+  color: var(--text-sanft);
+  font-size: 1.02rem;
+}
+
+.block--gratulation .erklaerung p {
+  margin: 0 0 0.9rem;
+}
+
+.block--gratulation .erklaerung p:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 620px) {
+  .abschluss-kopf {
+    grid-template-columns: minmax(0, 110px) minmax(0, 1fr);
+    gap: 1rem;
+  }
+}
+
+/* ---------- Konfetti ---------- */
+
+.konfetti {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 70vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.konfetti-schnipsel {
+  position: absolute;
+  top: -8vh;
+  width: 9px;
+  height: 14px;
+  border-radius: 2px;
+  opacity: 0;
+  animation: konfetti-fall 3.4s var(--verzug, 0s) cubic-bezier(0.3, 0.6, 0.5, 1) forwards;
+}
+
+@keyframes konfetti-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(0) rotate(var(--dreh, 0deg));
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(72vh) rotate(calc(var(--dreh, 0deg) + 540deg));
+  }
+}
+
+/* Wer weniger Bewegung eingestellt hat, bekommt sie auch hier nicht. */
+@media (prefers-reduced-motion: reduce) {
+  .konfetti {
+    display: none;
+  }
+}
+
+/* ---------- Bescheinigung am Bildschirm ---------- */
+
+.zertifikat-seite main {
+  max-width: 52rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 4rem;
+}
+
+.druckhinweis {
+  margin-bottom: 2rem;
+}
+
+.urkunde {
+  background: var(--karte);
+  border: 2px solid var(--text);
+  border-radius: 4px;
+  padding: 2.4rem 2.6rem 2rem;
+  box-shadow: var(--schatten);
+}
+
+.urkunde-kopf {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--linie);
+  padding-bottom: 1rem;
+}
+
+.urkunde-art {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.urkunde-art span {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 400;
+  color: var(--text-leise);
+}
+
+.siegel {
+  flex: none;
+  color: var(--text-sanft);
+}
+
+.urkunde-vorspann {
+  margin: 1.6rem 0 0.2rem;
+  color: var(--text-sanft);
+}
+
+.urkunde-name {
+  margin: 0 0 0.4rem;
+}
+
+.urkunde-name input {
+  width: 100%;
+  font: inherit;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--text);
+  padding: 0.2rem 0.1rem;
+  background: transparent;
+  border: 0;
+  border-bottom: 1.5px solid var(--text);
+}
+
+.urkunde-name input::placeholder {
+  color: var(--text-zart);
+  font-weight: 400;
+}
+
+.urkunde-satz {
+  margin: 0 0 1.6rem;
+}
+
+.urkunde-tabelle {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.urkunde-tabelle th {
+  text-align: left;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-leise);
+  border-bottom: 1px solid var(--text);
+  padding: 0 0.5rem 0.3rem 0;
+}
+
+.urkunde-tabelle td {
+  padding: 0.26rem 0.5rem 0.26rem 0;
+  border-bottom: 1px solid var(--linie-zart);
+  vertical-align: top;
+}
+
+.u-nr {
+  width: 2.4rem;
+  color: var(--text-leise);
+}
+
+.u-fokus {
+  width: 42%;
+  color: var(--text-sanft);
+}
+
+.urkunde-wdh {
+  margin: 1rem 0 1.6rem;
+  font-size: 0.9rem;
+  color: var(--text-sanft);
+}
+
+.urkunde-fuss {
+  display: flex;
+  justify-content: space-between;
+  gap: 2rem;
+  border-top: 1px solid var(--linie);
+  padding-top: 1rem;
+}
+
+.urkunde-feldname {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-leise);
+}
+
+.urkunde-datum,
+.urkunde-quelle {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.urkunde-datum input {
+  font: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--linie);
+  padding: 0.1rem 0;
+  width: 8rem;
+}
+
+.urkunde-hinweis {
+  margin: 1.2rem 0 0;
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: var(--text-leise);
+}
+
+.urkunde-hinweis span {
+  display: block;
+  margin-top: 0.2rem;
+  font-style: italic;
+}
+
+@media (max-width: 620px) {
+  .urkunde {
+    padding: 1.4rem 1.2rem;
+  }
+  .urkunde-fuss {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+}
+
+/* ---------- Druck ---------- */
+
+@media print {
+  /* @page lässt sich in CSS nicht auf eine Seite eingrenzen: diese Angabe
+     gilt beim Drucken für alle Seiten des Kurses, nicht nur für die Urkunde.
+     A4 ist für Au-Pairs in Deutschland das richtige Format, und gedruckt
+     werden soll ohnehin nur die Bescheinigung. Falls später auch
+     Lektionsseiten zum Ausdrucken gedacht sind, gehören die Druckregeln in
+     ein eigenes Stylesheet, das nur die Bescheinigung lädt. */
+  @page {
+    size: A4 portrait;
+    margin: 12mm;
+  }
+
+  .nicht-drucken {
+    display: none !important;
+  }
+
+  .zertifikat-seite {
+    background: #fff;
+  }
+
+  .zertifikat-seite main {
+    max-width: none;
+    padding: 0;
+  }
+
+  /* Browser lassen Hintergrundflächen beim Drucken standardmäßig weg. Die
+     Urkunde ist deshalb aus Linien gebaut und trägt auch ohne Flächen; wo
+     doch Farbe nötig ist, wird sie hier ausdrücklich verlangt. */
+  .urkunde,
+  .urkunde * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .urkunde {
+    box-shadow: none;
+    border: 2px solid #000;
+    padding: 10mm 12mm;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    font-size: 10.5pt;
+  }
+
+  /* Eingabefelder behalten im Druck sonst Rahmen und Hintergrund und sehen
+     aus wie ein Formular statt wie eine ausgefüllte Urkunde. */
+  .urkunde input {
+    border: 0 !important;
+    background: transparent !important;
+    color: #000 !important;
+  }
+
+  .urkunde-name input {
+    font-size: 20pt;
+    border-bottom: 1px solid #000 !important;
+  }
+
+  .urkunde-tabelle {
+    font-size: 8.6pt;
+  }
+
+  .urkunde-tabelle td {
+    padding: 1.1mm 2mm 1.1mm 0;
+  }
+
+  .urkunde-hinweis {
+    font-size: 7pt;
+  }
+}
+
+.karte--abschluss {
+  border-color: var(--signal);
+}

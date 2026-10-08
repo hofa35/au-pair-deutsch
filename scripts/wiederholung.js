@@ -66,7 +66,7 @@ function renderWiederholungHtml(wiederholung, eintrag, navigation, versionen = {
 <title>${wiederholung.titel} – Deutsch für Au-Pairs</title>
 <link rel="stylesheet" href="${mitVersion('styles.css', versionen.css)}">
 </head>
-<body>
+<body data-station="wiederholung-${wiederholung.nr}">
 <header class="kopfzeile">
   <a class="zurueck" href="index.html">${ZURUECK_ICON}<span>Alle Lektionen</span></a>
   <span class="kopf-hinweis">Wiederholung ${wiederholung.nr}</span>
@@ -86,6 +86,7 @@ ${renderNavigation(navigation)}<p class="lektion-fuss"><a class="zurueck" href="
 
 </main>
 <script src="${mitVersion('toggle.js', versionen.js)}"></script>
+<script src="${mitVersion('fortschritt.js', versionen.fortschritt)}"></script>
 </body>
 </html>`;
 }

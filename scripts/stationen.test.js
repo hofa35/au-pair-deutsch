@@ -3,7 +3,9 @@ const assert = require('node:assert');
 const {
   schluesselLektion,
   schluesselWdh,
+  SCHLUESSEL_ABSCHLUSS,
   baueStationen,
+  mitAbschlussStation,
   letzteWiederholungVor,
 } = require('./stationen.js');
 
@@ -96,4 +98,24 @@ test('eine geplante, aber ungebaute Wiederholung wird nicht verlinkt', () => {
 test('auf der Wiederholungsseite selbst wird nichts zurückverwiesen', () => {
   const stationen = baueStationen(uebersicht, plan);
   assert.strictEqual(letzteWiederholungVor('wiederholung-1', stationen, gebaut), null);
+});
+
+test('der Abschluss hängt sich ans Ende der Kette', () => {
+  const kette = [{ schluessel: 'lektion-1', nr: 1, titel: 'Erste' }];
+  const ergebnis = mitAbschlussStation(kette, { titel: 'Du hast es geschafft' });
+  assert.strictEqual(ergebnis.length, 2);
+  assert.strictEqual(ergebnis[1].schluessel, SCHLUESSEL_ABSCHLUSS);
+  assert.strictEqual(ergebnis[1].titel, 'Du hast es geschafft');
+  assert.strictEqual(ergebnis[1].marke, 'Abschluss');
+});
+
+test('ohne Abschlussdatei bleibt die Kette, wie sie war', () => {
+  const kette = [{ schluessel: 'lektion-1', nr: 1, titel: 'Erste' }];
+  assert.deepStrictEqual(mitAbschlussStation(kette, null), kette);
+});
+
+test('mitAbschlussStation verändert die übergebene Kette nicht', () => {
+  const kette = [{ schluessel: 'lektion-1', nr: 1, titel: 'Erste' }];
+  mitAbschlussStation(kette, { titel: 'Ende' });
+  assert.strictEqual(kette.length, 1);
 });

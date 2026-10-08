@@ -98,3 +98,9 @@ test('die Fußnavigation führt zurück in die Lektion und weiter zur nächsten'
   assert.doesNotMatch(html, /weiter-nebenlink/);
   assert.strictEqual(letzteWiederholungVor('wiederholung-7', stationen, gebaut), null);
 });
+
+test('eine Wiederholungsseite meldet sich als Station und lädt den Fortschritt', () => {
+  const html = renderWiederholungHtml(beispiel, null, null, { fortschritt: 'eee' });
+  assert.match(html, /<body data-station="wiederholung-7">/);
+  assert.match(html, /src="fortschritt\.js\?v=eee"/);
+});

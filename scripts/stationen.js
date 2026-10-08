@@ -8,6 +8,7 @@
 // Schlüssel mit ihrer Art davor.
 const schluesselLektion = (nr) => `lektion-${nr}`;
 const schluesselWdh = (nr) => `wiederholung-${nr}`;
+const SCHLUESSEL_ABSCHLUSS = 'abschluss';
 
 /**
  * Baut die Kette: alle Lektionen der Übersicht, dazwischen die
@@ -83,4 +84,31 @@ function letzteWiederholungVor(schluessel, stationen, gebaut) {
   return null;
 }
 
-module.exports = { schluesselLektion, schluesselWdh, baueStationen, letzteWiederholungVor };
+/**
+ * Hängt den Abschluss ans Ende der Kette. Dadurch führt "Weiter" auf
+ * Lektion 15 dorthin statt ins Nichts – bis hierher endete der Kurs ohne
+ * Rückmeldung, obwohl das der Punkt ist, an dem eine Rückmeldung zählt.
+ *
+ * Die Kette wird nicht verändert, sondern neu gebaut: der Aufrufer braucht
+ * beide Fassungen. Für die Fortschrittsanzeige zählen nur Lektionen und
+ * Wiederholungen, denn auf der Abschlussseite steht man ja gerade.
+ *
+ * @param {Array} stationen  Ergebnis von baueStationen
+ * @param {object|null} abschluss  geparste Abschlussdatei oder null
+ */
+function mitAbschlussStation(stationen, abschluss) {
+  if (!abschluss) return stationen;
+  return [
+    ...stationen,
+    { schluessel: SCHLUESSEL_ABSCHLUSS, titel: abschluss.titel, marke: 'Abschluss' },
+  ];
+}
+
+module.exports = {
+  schluesselLektion,
+  schluesselWdh,
+  SCHLUESSEL_ABSCHLUSS,
+  baueStationen,
+  mitAbschlussStation,
+  letzteWiederholungVor,
+};
