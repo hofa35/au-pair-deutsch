@@ -20,12 +20,28 @@ function buildSpeechRequest(text) {
 }
 
 /**
+ * Welche Audiodateien gehören zu diesem Dokument, und in welchen Ordner?
+ *
  * Wiederholungsseiten haben bewusst kein Audio: dort wird geschrieben und
- * erkannt, gehört wird in den Lektionen. Ohne diese Weiche liefe der Aufruf
- * mit leerem Text gegen die API.
+ * erkannt, gehört wird in den Lektionen. Der Abschluss hat genau eine Datei,
+ * Miras Gratulation.
  */
+function auftraegeFuer(dokument) {
+  if (dokument.art === 'abschluss') {
+    return { ordner: 'abschluss', auftraege: [{ name: 'gratulation.mp3', text: dokument.gesprochen }] };
+  }
+  if (dokument.art !== 'lektion') {
+    return { ordner: null, auftraege: [] };
+  }
+  const auftraege = [{ name: 'hoeruebung.mp3', text: dokument.hoertext }];
+  dokument.nachsprechen.forEach((satz, i) => {
+    auftraege.push({ name: `nachsprechen-${i + 1}.mp3`, text: satz });
+  });
+  return { ordner: String(dokument.id), auftraege };
+}
+
 function brauchtAudio(dokument) {
-  return dokument.art === 'lektion';
+  return auftraegeFuer(dokument).auftraege.length > 0;
 }
 
 function rufeTtsApiAuf(text, apiKey) {
@@ -61,36 +77,30 @@ async function main() {
 
   for (const datei of dateien) {
     const dokument = parseDokument(path.join(lektionenDir, datei));
-    if (!brauchtAudio(dokument)) continue;
-    const lektion = dokument;
-    const zielOrdner = path.join(__dirname, '..', 'audio', String(lektion.id));
-
-    // Hörübung plus je eine Datei pro Nachsprech-Satz, damit einzelne Sätze
-    // beliebig oft wiederholt werden können.
-    const auftraege = [{ name: 'hoeruebung.mp3', text: lektion.hoertext }];
-    lektion.nachsprechen.forEach((satz, i) => {
-      auftraege.push({ name: `nachsprechen-${i + 1}.mp3`, text: satz });
-    });
+    const { ordner, auftraege } = auftraegeFuer(dokument);
+    if (!ordner) continue;
+    const zielOrdner = path.join(__dirname, '..', 'audio', ordner);
 
     for (const auftrag of auftraege) {
       const ziel = path.join(zielOrdner, auftrag.name);
       if (fs.existsSync(ziel) && !alleNeu) {
-        console.log(`Lektion ${lektion.id}: ${auftrag.name} existiert bereits, übersprungen`);
+        console.log(`${ordner}: ${auftrag.name} existiert bereits, übersprungen`);
         continue;
       }
       const audioBase64 = await rufeTtsApiAuf(auftrag.text, apiKey);
       fs.mkdirSync(zielOrdner, { recursive: true });
       fs.writeFileSync(ziel, Buffer.from(audioBase64, 'base64'));
-      console.log(`Lektion ${lektion.id}: ${auftrag.name} geschrieben`);
+      console.log(`${ordner}: ${auftrag.name} geschrieben`);
     }
 
     // Dateien aufräumen, die zu gelöschten Nachsprech-Sätzen gehören.
-    if (fs.existsSync(zielOrdner)) {
+    // Nur bei Lektionen: nur dort hängt die Dateizahl am Inhalt.
+    if (dokument.art === 'lektion' && fs.existsSync(zielOrdner)) {
       const erlaubt = new Set(auftraege.map((a) => a.name));
       for (const vorhanden of fs.readdirSync(zielOrdner)) {
         if (vorhanden.startsWith('nachsprechen-') && !erlaubt.has(vorhanden)) {
           fs.rmSync(path.join(zielOrdner, vorhanden));
-          console.log(`Lektion ${lektion.id}: ${vorhanden} entfernt, Satz gibt es nicht mehr`);
+          console.log(`${ordner}: ${vorhanden} entfernt, Satz gibt es nicht mehr`);
         }
       }
     }
@@ -99,4 +109,4 @@ async function main() {
 
 if (require.main === module) main().catch((err) => { console.error(err); process.exit(1); });
 
-module.exports = { buildSpeechRequest, brauchtAudio };
+module.exports = { buildSpeechRequest, brauchtAudio, auftraegeFuer };
