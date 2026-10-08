@@ -108,3 +108,43 @@ test('validateDokument prüft Lektionen weiterhin als Lektionen', () => {
   assert.strictEqual(result.valid, false);
   assert.ok(result.errors.includes('wortschatz ist leer'));
 });
+
+const { validateAbschluss } = require('./pruefstand.js');
+
+function vollstaendigerAbschluss(ueberschreiben = {}) {
+  return {
+    art: 'abschluss',
+    titel: 'Du hast es geschafft',
+    gratulationDe: 'Glückwunsch.',
+    gratulationEn: 'Congratulations.',
+    gesprochen: 'Du hast es geschafft.',
+    bescheinigungDe: 'Keine Prüfung.',
+    bescheinigungEn: 'Not an exam.',
+    ...ueberschreiben,
+  };
+}
+
+test('vollständiger Abschluss ist gültig', () => {
+  const result = validateAbschluss(vollstaendigerAbschluss());
+  assert.strictEqual(result.valid, true);
+  assert.deepStrictEqual(result.errors, []);
+});
+
+test('fehlende Pflichtfelder des Abschlusses werden gemeldet', () => {
+  const result = validateAbschluss(vollstaendigerAbschluss({ gratulationEn: '', gesprochen: '' }));
+  assert.strictEqual(result.valid, false);
+  assert.ok(result.errors.includes('gratulationEn fehlt'));
+  assert.ok(result.errors.includes('gesprochen fehlt'));
+});
+
+test('ein zu langer Sprechtext wird beanstandet', () => {
+  const result = validateAbschluss(vollstaendigerAbschluss({ gesprochen: 'a'.repeat(501) }));
+  assert.strictEqual(result.valid, false);
+  assert.ok(result.errors.some((fehler) => fehler.startsWith('gesprochen ist zu lang')));
+});
+
+test('validateDokument verteilt auf die richtige Prüfung', () => {
+  const result = validateDokument(vollstaendigerAbschluss({ titel: '' }));
+  assert.strictEqual(result.valid, false);
+  assert.ok(result.errors.includes('titel fehlt'));
+});

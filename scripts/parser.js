@@ -137,13 +137,38 @@ function parseWiederholungAus(frontmatter, body) {
   };
 }
 
+/**
+ * Der Abschluss: die letzte Station, kein Stoff mehr. Die Gratulation steht
+ * zweisprachig da wie jede Erklärung im Kurs. "Gesprochen" ist der Text, aus
+ * dem Miras Tonspur erzeugt wird – bewusst getrennt vom Lesetext, weil
+ * Gesprochenes kürzer und einfacher sein muss als Geschriebenes.
+ * "Bescheinigung" ist der Hinweis, der unten auf der Urkunde steht.
+ */
+function parseAbschlussAus(frontmatter, body) {
+  return {
+    art: 'abschluss',
+    titel: frontmatter.titel,
+    gratulationDe: getSection(body, 'Gratulation Deutsch'),
+    gratulationEn: getSection(body, 'Gratulation Englisch'),
+    gesprochen: getSection(body, 'Gesprochen'),
+    bescheinigungDe: getSection(body, 'Bescheinigung Deutsch'),
+    bescheinigungEn: getSection(body, 'Bescheinigung Englisch'),
+  };
+}
+
+function parseAbschluss(filePath) {
+  const raw = fs.readFileSync(filePath, 'utf8');
+  const { frontmatter, body } = parseFrontmatter(raw);
+  return parseAbschlussAus(frontmatter, body);
+}
+
 /** Liest eine Datei und entscheidet anhand von "typ", wie sie gelesen wird. */
 function parseDokument(filePath) {
   const raw = fs.readFileSync(filePath, 'utf8');
   const { frontmatter, body } = parseFrontmatter(raw);
-  return frontmatter.typ === 'wiederholung'
-    ? parseWiederholungAus(frontmatter, body)
-    : parseLektionAus(frontmatter, body);
+  if (frontmatter.typ === 'wiederholung') return parseWiederholungAus(frontmatter, body);
+  if (frontmatter.typ === 'abschluss') return parseAbschlussAus(frontmatter, body);
+  return parseLektionAus(frontmatter, body);
 }
 
 function parseLektion(filePath) {
@@ -158,4 +183,4 @@ function parseWiederholung(filePath) {
   return parseWiederholungAus(frontmatter, body);
 }
 
-module.exports = { parseLektion, parseWiederholung, parseDokument, parseAbschnitte };
+module.exports = { parseLektion, parseWiederholung, parseAbschluss, parseDokument, parseAbschnitte };
