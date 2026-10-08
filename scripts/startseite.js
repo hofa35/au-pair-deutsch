@@ -16,6 +16,8 @@ const PFEIL_ICON = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
 
 const WIEDERHOLEN_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4.5V9h4.5"/></svg>`;
 
+const POKAL_ICON = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M17 5h3v2a3 3 0 0 1-3 3"/><path d="M7 5H4v2a3 3 0 0 0 3 3"/></svg>`;
+
 /**
  * Wiederholungsband zwischen zwei Lektionskarten.
  *
@@ -38,6 +40,22 @@ function renderWiederholungsKarte(plan) {
   }
   return `<li class="zwischenstation"><div class="karte karte--wiederholung karte--bald" aria-disabled="true">${inneres}
 </div></li>`;
+}
+
+/**
+ * Das Abschlussband am Ende des Rasters. Es steht da, bevor jemand dort
+ * ankommt: man soll von Anfang an sehen, worauf der Kurs zuläuft.
+ */
+function renderAbschlussKarte(abschluss) {
+  if (!abschluss) return '';
+  return `<li class="zwischenstation"><a class="karte karte--wiederholung karte--abschluss" href="abschluss.html">
+  <span class="wkarte-marke" style="background:var(--signal)">${POKAL_ICON}Abschluss</span>
+  <span class="wkarte-text">
+    <span class="wkarte-titel">${escapeHtml(abschluss.titel)}</span>
+    <span class="wkarte-info">Am Ende steht eine Bescheinigung über alles, was du geübt hast, zum Ausdrucken.</span>
+  </span>
+  <span class="karte-pfeil">${PFEIL_ICON}</span>
+</a></li>`;
 }
 
 const SCHRITTE = [
@@ -80,8 +98,10 @@ function renderKarte(eintrag, lektionsDatei, istErste) {
  *   bleiben. Siehe mitVersion() in renderer.js.
  * @param {Array} [wiederholungen]  Wiederholungsplan, bei fertigen Seiten
  *   um dateiname ergänzt. Ohne Angabe erscheint keine.
+ * @param {object|null} [abschluss]  Abschlussdokument aus lektionen/abschluss.md.
+ *   Ohne Datei bleibt das Abschlussband weg.
  */
-function renderStartseiteHtml(uebersicht, gebaut, versionen = {}, wiederholungen = []) {
+function renderStartseiteHtml(uebersicht, gebaut, versionen = {}, wiederholungen = [], abschluss = null) {
   const stylesheet = versionen.css ? `styles.css?v=${versionen.css}` : 'styles.css';
   const ersteFertige = uebersicht.find((e) => gebaut.has(e.nr));
   const anzahlFertig = gebaut.size;
@@ -103,7 +123,8 @@ function renderStartseiteHtml(uebersicht, gebaut, versionen = {}, wiederholungen
       kartenTeile.push(renderWiederholungsKarte(plan));
     }
   });
-  const karten = kartenTeile.join('\n');
+  kartenTeile.push(renderAbschlussKarte(abschluss));
+  const karten = kartenTeile.filter((teil) => teil !== '').join('\n');
 
   const wiederholungsHinweis = wiederholungen.length
     ? ` Dazwischen liegen ${wiederholungen.length} Wiederholungen.`
@@ -142,7 +163,7 @@ function renderStartseiteHtml(uebersicht, gebaut, versionen = {}, wiederholungen
     <h1>Deutsch für deinen Alltag<span class="hero-kursiv">mit Mira durch die ersten Wochen</span></h1>
     <p class="hero-fliess">Fünfzehn Lektionen zu dem, was wirklich jeden Tag vorkommt: Gastfamilie, Haushalt, Kinder, Einkaufen, Termine, Notfälle. Alles steht zuerst auf einfachem Deutsch. Wenn du etwas nicht verstehst, schaltest du mit einem Klick auf Englisch um.</p>
     <p class="hero-knopfreihe">${startKnopf}</p>
-    <p class="hero-kleingedruckt">Kein Konto, keine Anmeldung. Es wird nichts gespeichert.</p>
+    <p class="hero-kleingedruckt">Kein Konto, keine Anmeldung. Dein Fortschritt bleibt nur in deinem Browser und wird nirgendwohin geschickt.</p>
   </div>
   <div class="hero-bild">
     <img src="bilder/mira.webp" alt="Mira winkt zur Begrüßung" width="640" height="1548" decoding="async">
@@ -174,7 +195,7 @@ ${karten}
   <img class="fuss-avatar" src="bilder/mira-kopf.webp" alt="" width="240" height="240" loading="lazy" decoding="async">
   <div>
     <p class="fuss-satz">Mira begleitet dich durch alle Lektionen – vom ersten Hallo am Bahnhof bis zum Rückblick auf deine erste Woche.</p>
-    <p class="fuss-klein">Offenes Lernangebot, orientiert an der A1-Progression des Goethe-Instituts. Kein Zertifikat, keine Prüfung, kein Konto.</p>
+    <p class="fuss-klein">Offenes Lernangebot, orientiert an der A1-Progression des Goethe-Instituts. Am Ende gibt es eine Teilnahmebescheinigung zum Ausdrucken. Keine Prüfung, kein Konto.</p>
   </div>
  </div>
 </footer>
@@ -183,4 +204,4 @@ ${karten}
 </html>`;
 }
 
-module.exports = { renderStartseiteHtml, renderWiederholungsKarte, escapeHtml };
+module.exports = { renderStartseiteHtml, renderWiederholungsKarte, renderAbschlussKarte, escapeHtml };

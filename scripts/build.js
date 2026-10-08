@@ -208,7 +208,7 @@ function main() {
 
   fs.writeFileSync(
     path.join(distDir, 'index.html'),
-    renderStartseiteHtml(uebersicht, gebauteLektionen, versionen, wdhFuerStartseite)
+    renderStartseiteHtml(uebersicht, gebauteLektionen, versionen, wdhFuerStartseite, abschluss)
   );
 
   console.log(

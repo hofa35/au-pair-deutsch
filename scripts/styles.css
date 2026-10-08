@@ -1451,3 +1451,7 @@ a.karte--wiederholung:hover {
     font-size: 7pt;
   }
 }
+
+.karte--abschluss {
+  border-color: var(--signal);
+}

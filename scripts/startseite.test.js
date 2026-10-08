@@ -108,3 +108,32 @@ test('ohne Plan bleibt die Startseite unverändert', () => {
   assert.doesNotMatch(html, /zwischenstation/);
   assert.doesNotMatch(html, /Dazwischen liegen/);
 });
+
+const ABSCHLUSS = { art: 'abschluss', titel: 'Du hast es geschafft' };
+
+test('die Startseite behauptet nicht mehr, es werde nichts gespeichert', () => {
+  const html = renderStartseiteHtml([], new Map(), {}, []);
+  assert.ok(!html.includes('Es wird nichts gespeichert'));
+  assert.match(html, /nur in deinem Browser/);
+});
+
+test('die Fußzeile behauptet nicht mehr, es gebe kein Zertifikat', () => {
+  const html = renderStartseiteHtml([], new Map(), {}, []);
+  assert.ok(!html.includes('Kein Zertifikat'));
+  assert.match(html, /Teilnahmebescheinigung/);
+});
+
+test('der Abschluss steht als letztes Band im Raster', () => {
+  const uebersicht = [{ nr: 1, titel: 'Erste', satz: 'Hallo', schlagwort: 'Start', akzent: '#FFECD2' }];
+  const gebaut = new Map([[1, { titel: 'Erste', dateiname: 'lektion-01.html' }]]);
+  const html = renderStartseiteHtml(uebersicht, gebaut, {}, [], ABSCHLUSS);
+  assert.match(html, /href="abschluss\.html"/);
+  assert.match(html, /Du hast es geschafft/);
+});
+
+test('ohne Abschlussdatei gibt es kein Abschlussband', () => {
+  const uebersicht = [{ nr: 1, titel: 'Erste', satz: 'Hallo', schlagwort: 'Start', akzent: '#FFECD2' }];
+  const gebaut = new Map([[1, { titel: 'Erste', dateiname: 'lektion-01.html' }]]);
+  const html = renderStartseiteHtml(uebersicht, gebaut, {}, []);
+  assert.ok(!html.includes('abschluss.html'));
+});
