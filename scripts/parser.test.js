@@ -118,6 +118,22 @@ test('parseDokument erkennt die Art an der Frontmatter, nicht am Dateinamen', ()
 
 const { parseAbschluss } = require('./parser.js');
 
+test('parseAbschluss liest Frontmatter und zweisprachige Gratulation', () => {
+  const abschluss = parseAbschluss(path.join(__dirname, 'fixtures', 'test-abschluss.md'));
+  assert.strictEqual(abschluss.art, 'abschluss');
+  assert.strictEqual(abschluss.titel, 'Testabschluss');
+  assert.match(abschluss.gratulationDe, /Erster deutscher Absatz/);
+  assert.match(abschluss.gratulationDe, /Zweiter deutscher Absatz/);
+  assert.strictEqual(abschluss.gratulationEn, 'First English paragraph.');
+});
+
+test('parseAbschluss liest Sprechtext und Bescheinigung', () => {
+  const abschluss = parseAbschluss(path.join(__dirname, 'fixtures', 'test-abschluss.md'));
+  assert.strictEqual(abschluss.gesprochen, 'Gesprochener Testsatz.');
+  assert.strictEqual(abschluss.bescheinigungDe, 'Deutscher Hinweis.');
+  assert.strictEqual(abschluss.bescheinigungEn, 'English note.');
+});
+
 test('parseDokument erkennt den Typ abschluss am Frontmatter', () => {
   const abschluss = parseDokument(path.join(__dirname, 'fixtures', 'test-abschluss.md'));
   assert.strictEqual(abschluss.art, 'abschluss');
