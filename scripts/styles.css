@@ -1384,6 +1384,12 @@ a.karte--wiederholung:hover {
 /* ---------- Druck ---------- */
 
 @media print {
+  /* @page lässt sich in CSS nicht auf eine Seite eingrenzen: diese Angabe
+     gilt beim Drucken für alle Seiten des Kurses, nicht nur für die Urkunde.
+     A4 ist für Au-Pairs in Deutschland das richtige Format, und gedruckt
+     werden soll ohnehin nur die Bescheinigung. Falls später auch
+     Lektionsseiten zum Ausdrucken gedacht sind, gehören die Druckregeln in
+     ein eigenes Stylesheet, das nur die Bescheinigung lädt. */
   @page {
     size: A4 portrait;
     margin: 12mm;
@@ -1393,7 +1399,7 @@ a.karte--wiederholung:hover {
     display: none !important;
   }
 
-  body {
+  .zertifikat-seite {
     background: #fff;
   }
 
