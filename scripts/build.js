@@ -7,10 +7,14 @@ const { validateDokument } = require('./pruefstand.js');
 const { renderLektionHtml, baueNavigation } = require('./renderer.js');
 const { renderWiederholungHtml } = require('./wiederholung.js');
 const { renderStartseiteHtml } = require('./startseite.js');
+const { renderAbschlussHtml } = require('./abschluss.js');
+const { renderZertifikatHtml } = require('./zertifikat.js');
 const {
   schluesselLektion,
   schluesselWdh,
+  SCHLUESSEL_ABSCHLUSS,
   baueStationen,
+  mitAbschlussStation,
   letzteWiederholungVor,
 } = require('./stationen.js');
 
@@ -34,6 +38,8 @@ function main() {
 
   fs.mkdirSync(distDir, { recursive: true });
   fs.copyFileSync(path.join(__dirname, 'toggle.js'), path.join(distDir, 'toggle.js'));
+  fs.copyFileSync(path.join(__dirname, 'fortschritt.js'), path.join(distDir, 'fortschritt.js'));
+  fs.copyFileSync(path.join(__dirname, 'urkunde.js'), path.join(distDir, 'urkunde.js'));
   fs.copyFileSync(path.join(__dirname, 'styles.css'), path.join(distDir, 'styles.css'));
 
   // Prüfsummen von Stylesheet und Skript. Sie hängen als ?v=... an den
@@ -42,6 +48,8 @@ function main() {
   const versionen = {
     css: kurzpruefsumme(path.join(__dirname, 'styles.css')),
     js: kurzpruefsumme(path.join(__dirname, 'toggle.js')),
+    fortschritt: kurzpruefsumme(path.join(__dirname, 'fortschritt.js')),
+    urkunde: kurzpruefsumme(path.join(__dirname, 'urkunde.js')),
   };
 
   // Bilder sind fertig aufbereitet eingecheckt (siehe scripts/bilder-aufbereiten.js).
@@ -67,6 +75,7 @@ function main() {
   const dateien = fs.readdirSync(lektionenDir).filter((f) => f.endsWith('.md'));
   const lektionen = [];
   const wiederholungen = [];
+  let abschluss = null;
 
   for (const datei of dateien) {
     const dokument = parseDokument(path.join(lektionenDir, datei));
@@ -81,6 +90,8 @@ function main() {
         );
       }
       wiederholungen.push(dokument);
+    } else if (dokument.art === 'abschluss') {
+      abschluss = dokument;
     } else {
       lektionen.push(dokument);
     }
@@ -89,9 +100,15 @@ function main() {
   lektionen.sort((a, b) => a.id - b.id);
   wiederholungen.sort((a, b) => a.nr - b.nr);
 
-  const stationen = baueStationen(uebersicht, wiederholungsplan, (text) =>
+  // Zwei Fassungen der Kette: der Lernweg ohne Abschluss liefert die Zahl
+  // für die Fortschrittsanzeige (auf der Abschlussseite steht man ja schon),
+  // die Kette mit Abschluss liefert die Fußnavigation.
+  const lernweg = baueStationen(uebersicht, wiederholungsplan, (text) =>
     console.warn(`Warnung: ${text}`)
   );
+  const stationen = mitAbschlussStation(lernweg, abschluss);
+  const lernwegSchluessel = lernweg.map((station) => station.schluessel);
+
   const gebaut = new Map();
   for (const lektion of lektionen) {
     gebaut.set(schluesselLektion(lektion.id), {
@@ -104,6 +121,13 @@ function main() {
       titel: wdh.titel,
       dateiname: wdhDateinameFuer(wdh.nr),
       marke: `Wiederholung ${wdh.nr}`,
+    });
+  }
+  if (abschluss) {
+    gebaut.set(SCHLUESSEL_ABSCHLUSS, {
+      titel: abschluss.titel,
+      dateiname: 'abschluss.html',
+      marke: 'Abschluss',
     });
   }
 
@@ -149,6 +173,31 @@ function main() {
     fs.writeFileSync(path.join(distDir, wdhDateinameFuer(wdh.nr)), html);
   }
 
+  if (abschluss) {
+    // Miras Gratulation liegt in audio/abschluss/, erzeugt von
+    // generate_audio.js. Fehlt sie, wird trotzdem gebaut: ein stummer
+    // Abspieler ist weniger schlimm als eine Seite, die gar nicht erscheint.
+    const abschlussAudioQuelle = path.join(wurzel, 'audio', 'abschluss');
+    const abschlussAudioZiel = path.join(distDir, 'audio', 'abschluss');
+    fs.mkdirSync(abschlussAudioZiel, { recursive: true });
+    if (fs.existsSync(abschlussAudioQuelle)) {
+      fs.cpSync(abschlussAudioQuelle, abschlussAudioZiel, { recursive: true });
+    }
+    if (!fs.existsSync(path.join(abschlussAudioZiel, 'gratulation.mp3'))) {
+      console.warn('Warnung: Miras Gratulation fehlt, die Abschlussseite wird ohne Ton gebaut');
+    }
+
+    const navigation = baueNavigation(SCHLUESSEL_ABSCHLUSS, stationen, gebaut);
+    fs.writeFileSync(
+      path.join(distDir, 'abschluss.html'),
+      renderAbschlussHtml(abschluss, navigation, versionen, lernwegSchluessel)
+    );
+    fs.writeFileSync(
+      path.join(distDir, 'zertifikat.html'),
+      renderZertifikatHtml(lektionen, wiederholungsplan, abschluss, versionen)
+    );
+  }
+
   const gebauteLektionen = new Map(
     lektionen.map((l) => [l.id, { titel: l.titel, dateiname: dateinameFuer(l.id) }])
   );
@@ -163,8 +212,9 @@ function main() {
   );
 
   console.log(
-    `Build fertig: ${lektionen.length} von ${uebersicht.length} Lektion(en) und ` +
-      `${wiederholungen.length} von ${wiederholungsplan.length} Wiederholung(en) in dist/`
+    `Build fertig: ${lektionen.length} von ${uebersicht.length} Lektion(en), ` +
+      `${wiederholungen.length} von ${wiederholungsplan.length} Wiederholung(en)` +
+      `${abschluss ? ' und der Abschluss' : ', ohne Abschlussseite'} in dist/`
   );
 }
 
