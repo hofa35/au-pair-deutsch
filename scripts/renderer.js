@@ -284,4 +284,5 @@ module.exports = {
   renderLoesung,
   mitVersion,
   ZURUECK_ICON,
+  LAUTSPRECHER_ICON,
 };
