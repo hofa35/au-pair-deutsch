@@ -109,7 +109,7 @@ ${renderZeilen(lektionen)}
     <p class="urkunde-quelle"><span class="urkunde-feldname">Kurs im Netz</span>${ADRESSE}</p>
   </div>
 
-  <p class="urkunde-hinweis">${escapeHtml(abschluss.bescheinigungDe)}<span lang="en">${escapeHtml(abschluss.bescheinigungEn)}</span></p>
+  <p class="urkunde-hinweis"><span lang="de">${escapeHtml(abschluss.bescheinigungDe)}</span><span lang="en">${escapeHtml(abschluss.bescheinigungEn)}</span></p>
 </article>
 
 </main>
