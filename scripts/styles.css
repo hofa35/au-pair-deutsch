@@ -1365,8 +1365,14 @@ a.karte--wiederholung:hover {
   color: var(--text-leise);
 }
 
+/* Beide Fassungen stehen in einem eigenen span, damit sie im Druck
+   nebeneinander gesetzt werden können. Am Bildschirm bleiben sie
+   untereinander, dort ist Platz genug. */
 .urkunde-hinweis span {
   display: block;
+}
+
+.urkunde-hinweis span[lang='en'] {
   margin-top: 0.2rem;
   font-style: italic;
 }
@@ -1417,13 +1423,41 @@ a.karte--wiederholung:hover {
     print-color-adjust: exact;
   }
 
+  /* Die Urkunde muss auf eine Seite passen, sonst steht die Hälfte des
+     Hinweises auf einem zweiten Blatt und der Rahmen schließt nirgends ab.
+     Fünfzehn Tabellenzeilen plus Kopf und Fuß sind für A4 knapp, deshalb
+     sind die Abstände hier durchweg enger als am Bildschirm. Wer Zeilen
+     ergänzt, muss die Druckvorschau erneut ansehen. */
   .urkunde {
     box-shadow: none;
     border: 2px solid #000;
-    padding: 10mm 12mm;
+    padding: 9mm 11mm;
     page-break-inside: avoid;
     break-inside: avoid;
     font-size: 10.5pt;
+  }
+
+  .urkunde-kopf {
+    padding-bottom: 3mm;
+  }
+
+  .urkunde-art {
+    font-size: 15pt;
+  }
+
+  /* Das Siegel ist am Bildschirm 140 Pixel hoch, also gut 37 mm. Auf dem
+     Blatt sind das die Millimeter, die dem Hinweis unten fehlen. */
+  .siegel {
+    width: 28mm;
+    height: 28mm;
+  }
+
+  .urkunde-vorspann {
+    margin: 6mm 0 1mm;
+  }
+
+  .urkunde-satz {
+    margin-bottom: 6mm;
   }
 
   /* Eingabefelder behalten im Druck sonst Rahmen und Hintergrund und sehen
@@ -1435,7 +1469,7 @@ a.karte--wiederholung:hover {
   }
 
   .urkunde-name input {
-    font-size: 20pt;
+    font-size: 18pt;
     border-bottom: 1px solid #000 !important;
   }
 
@@ -1444,11 +1478,34 @@ a.karte--wiederholung:hover {
   }
 
   .urkunde-tabelle td {
-    padding: 1.1mm 2mm 1.1mm 0;
+    padding: 1mm 2mm 1mm 0;
   }
 
+  .urkunde-wdh {
+    margin: 4mm 0 5mm;
+    font-size: 8.4pt;
+  }
+
+  .urkunde-fuss {
+    padding-top: 3mm;
+  }
+
+  /* Deutsch und Englisch nebeneinander statt untereinander. Das spart die
+     drei Zeilen, an denen die Urkunde bisher auf die zweite Seite rutschte,
+     und stellt die beiden Fassungen zugleich als das dar, was sie sind:
+     derselbe Hinweis, nicht zwei. */
   .urkunde-hinweis {
+    display: flex;
+    gap: 6mm;
+    margin-top: 4mm;
     font-size: 7pt;
+    line-height: 1.4;
+  }
+
+  .urkunde-hinweis span {
+    display: block;
+    flex: 1;
+    margin-top: 0;
   }
 }
 

@@ -118,3 +118,84 @@ Wiederholung bekommt zusätzlich einen kleinen Zweitverweis zurück auf sie.
 Inhaltliche Regel für die nächsten Wiederholungen: nicht nur die letzten
 drei Lektionen abfragen, sondern eine Aufgabe auf noch früheren Stoff
 richten. Sonst fällt der Anfang nach einigen Wochen trotzdem heraus.
+
+## Abschluss und Bescheinigung
+
+Hinter der letzten Lektion liegt der Abschluss: Miras Gratulation, der
+Fortschrittsstand und der Weg zur Bescheinigung. Erkannt wird die Datei an
+`typ: abschluss`, genau wie Wiederholungen an `typ: wiederholung`.
+
+    lektionen/abschluss.md
+
+Aufbau:
+
+    ## Gratulation Deutsch        Lesetext, mehrere Absätze erlaubt, Pflicht
+    ## Gratulation Englisch       dieselbe Gratulation hinter dem Umschalter
+    ## Gesprochen                 Text für Miras Tonspur, höchstens 500 Zeichen
+    ## Bescheinigung Deutsch      Hinweis unten auf der Urkunde
+    ## Bescheinigung Englisch     derselbe Hinweis auf Englisch
+
+Der Sprechtext steht getrennt vom Lesetext, weil Gesprochenes kürzer und
+einfacher sein muss. `generate_audio.js` macht daraus
+`audio/abschluss/gratulation.mp3`.
+
+Fehlt `lektionen/abschluss.md`, baut der Build ohne Abschlussseite und ohne
+Bescheinigung durch und sagt das in seiner Schlussmeldung.
+
+### Die Bescheinigung
+
+`dist/zertifikat.html` ist am Bildschirm eine Seite mit Anleitung und auf
+Papier eine Urkunde. Das PDF erzeugt der Browser über die Druckfunktion, es
+gibt keine PDF-Bibliothek. Name und Datum stehen in Eingabefeldern mitten in
+der Urkunde; Eingabefelder drucken ihren Wert mit, und nichts davon wird
+gespeichert oder verschickt.
+
+Zwei Festlegungen, die nicht aus Versehen entstanden sind:
+
+Es steht nirgends, ein Niveau sei bestanden. Ein Kurs ohne Prüfung kann das
+nicht bescheinigen. Stattdessen führt die Urkunde alle Lektionen mit ihrem
+Grammatikfokus auf – für eine Gastfamilie oder Agentur die brauchbarere
+Angabe.
+
+Es gibt kein Unterschriftsfeld. Mira ist eine Zeichnung, eine erfundene
+Signatur auf einem vorzeigbaren Dokument wäre eine Lüge. Das Siegel nennt
+den Kursnamen, die Adresse steht in der Fußzeile der Urkunde.
+
+**Die Urkunde muss auf eine A4-Seite passen.** Fünfzehn Tabellenzeilen plus
+Kopf und Fuß sind dafür knapp, deshalb sind im `@media print`-Block alle
+Abstände enger als am Bildschirm, das Siegel ist kleiner, und der Hinweis
+steht zweispaltig statt untereinander. Wer dort Zeilen ergänzt oder
+Schriftgrößen ändert, muss nachmessen. Ohne Browser geht das so:
+
+    msedge --headless=new --disable-gpu --no-pdf-header-footer \
+      --print-to-pdf=/tmp/p.pdf "file:///…/dist/zertifikat.html"
+    pdftotext /tmp/p.pdf - | grep -c $'\f'    # muss 1 ergeben
+
+Stand Oktober 2026 bleiben dabei rund 20 mm Luft nach unten.
+
+Eine Einschränkung, die man kennen muss: `@page` lässt sich in CSS nicht auf
+eine einzelne Seite eingrenzen. Die Angabe `size: A4 portrait` gilt deshalb
+beim Drucken für alle 22 Seiten, nicht nur für die Urkunde. Sollen
+Lektionsseiten einmal zum Ausdrucken gedacht sein, gehören die Druckregeln
+in ein eigenes Stylesheet, das nur die Bescheinigung lädt.
+
+### Fortschritt
+
+`scripts/fortschritt.js` merkt sich im `localStorage` des Browsers, welche
+Stationen besucht wurden. Jede Lektions- und Wiederholungsseite meldet sich
+über `<body data-station="…">`, die Abschlussseite zeigt die Zahl an. Die
+Schlüssel stammen aus `scripts/stationen.js` und müssen zeichengenau
+übereinstimmen, sonst bleibt der Zähler stillschweigend bei null.
+
+Gesperrt wird nichts. Wer seinen Browserspeicher verliert, hat nichts falsch
+gemacht und kommt trotzdem an seine Bescheinigung. In privaten Fenstern und
+bei blockierten Cookies wirft schon der Zugriff auf `localStorage`; dann
+verhält sich der Kurs wie vorher und zeigt den Stand einfach nicht an.
+
+## Zeilenenden
+
+Der Parser vereinheitlicht die Zeilenenden, bevor er etwas liest. Das ist
+nicht kosmetisch: Git stellt auf Windows mit `core.autocrlf=true` beim
+Auschecken auf CRLF um, und ohne diesen Schritt findet schon die
+Frontmatter-Suche nichts mehr. Der Build läuft dann auf dem Linux-Server der
+CI durch und scheitert auf dem Rechner, auf dem die Inhalte entstehen.

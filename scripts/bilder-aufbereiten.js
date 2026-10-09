@@ -55,6 +55,34 @@ const ZUORDNUNG = {
  * Kartenkoordinaten, also nach dem Verkleinern auf 720x480.
  */
 const RETUSCHEN = {
+  // Das Bild behauptete zweimal, 14:10 Uhr sei "Viertel nach zwei". Viertel
+  // nach zwei ist 14:15. Die Lektion erklärt es richtig, das Bild widersprach
+  // ihr – oben im Kopfbanner und unten im Tippkasten. Beide Male wird nur der
+  // falsche Teil überdeckt. Übrig bleiben "Die Uhrzeit: 14:10 Uhr" und
+  // "... ist es 14:10 Uhr", beides richtig und für sich verständlich.
+  // Die Kanten sind am verkleinerten Bild abgemessen, nicht geschätzt.
+  5: [
+    {
+      links: 259,
+      rechts: 429,
+      obenLinks: 43,
+      obenRechts: 43,
+      untenLinks: 70,
+      untenRechts: 70,
+      farbe: '0xF7E7D6', // Wand rechts neben dem Banner ausgelesen
+      grund: 'falsche Uhrzeitangabe im Kopfbanner',
+    },
+    {
+      links: 258,
+      rechts: 352,
+      obenLinks: 435,
+      obenRechts: 435,
+      untenLinks: 448,
+      untenRechts: 448,
+      farbe: '0xA8D0E3', // Tippkasten rechts neben dem Text ausgelesen
+      grund: 'falsche Uhrzeitangabe im Tippkasten',
+    },
+  ],
   7: [
     {
       links: 511,

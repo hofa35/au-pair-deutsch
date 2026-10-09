@@ -15,6 +15,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      # Erst prüfen, dann bauen. Ohne diesen Schritt fiel ein gebrochener
+      # Test hier nicht auf, weil die CI nur den Build kannte.
+      - run: node --test scripts/*.test.js
+      - run: node scripts/pruefstand.js
       - run: node scripts/build.js
       - uses: actions/upload-pages-artifact@v3
         with:
