@@ -10,7 +10,21 @@
 // Datei eine Lektion – so bleiben alle bisherigen Dateien unverändert gültig.
 const fs = require('node:fs');
 
-function parseFrontmatter(raw) {
+/**
+ * Vereinheitlicht die Zeilenenden, bevor irgendetwas geparst wird.
+ *
+ * Git stellt auf Windows mit core.autocrlf=true beim Auschecken auf CRLF um.
+ * Jede Regex hier erwartet aber \n, und ohne diesen Schritt findet schon die
+ * Frontmatter-Suche nichts mehr: der Build läuft dann auf dem Linux-Server
+ * der CI durch und scheitert auf dem Rechner, auf dem die Inhalte entstehen.
+ * Das BOM fällt gleich mit weg, sonst steht es vor dem ersten "---".
+ */
+function normalisiereZeilenenden(raw) {
+  return raw.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+}
+
+function parseFrontmatter(rohtext) {
+  const raw = normalisiereZeilenenden(rohtext);
   const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) throw new Error('Keine Frontmatter gefunden');
   const [, frontmatterRaw, body] = match;
@@ -183,4 +197,11 @@ function parseWiederholung(filePath) {
   return parseWiederholungAus(frontmatter, body);
 }
 
-module.exports = { parseLektion, parseWiederholung, parseAbschluss, parseDokument, parseAbschnitte };
+module.exports = {
+  parseLektion,
+  parseWiederholung,
+  parseAbschluss,
+  parseDokument,
+  parseAbschnitte,
+  normalisiereZeilenenden,
+};

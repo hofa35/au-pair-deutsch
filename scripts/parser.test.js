@@ -154,3 +154,26 @@ test('eine Datei ohne typ bleibt eine Lektion', () => {
   const lektion = parseDokument(path.join(__dirname, 'fixtures', 'test-lektion.md'));
   assert.strictEqual(lektion.art, 'lektion');
 });
+
+const { normalisiereZeilenenden } = require('./parser.js');
+const fsTest = require('node:fs');
+const osTest = require('node:os');
+
+test('Windows-Zeilenenden werden vor dem Parsen vereinheitlicht', () => {
+  assert.strictEqual(normalisiereZeilenenden('a\r\nb\r\n'), 'a\nb\n');
+  assert.strictEqual(normalisiereZeilenenden('a\rb'), 'a\nb');
+  assert.strictEqual(normalisiereZeilenenden('\uFEFF---\n'), '---\n');
+});
+
+test('eine Datei mit CRLF wird genauso gelesen wie mit LF', () => {
+  // Git stellt auf Windows beim Auschecken auf CRLF um. Vorher scheiterte
+  // schon die Frontmatter-Suche, und zwar nur auf Windows, nicht in der CI.
+  const quelle = path.join(__dirname, 'fixtures', 'test-lektion.md');
+  const mitCrlf = path.join(osTest.tmpdir(), 'test-lektion-crlf.md');
+  fsTest.writeFileSync(mitCrlf, fsTest.readFileSync(quelle, 'utf8').replace(/\n/g, '\r\n'));
+  try {
+    assert.deepStrictEqual(parseLektion(mitCrlf), parseLektion(quelle));
+  } finally {
+    fsTest.rmSync(mitCrlf, { force: true });
+  }
+});
