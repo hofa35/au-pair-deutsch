@@ -4,16 +4,43 @@
 // gibt es nur eine Art von Dokument (Verkehrsmodul), und Module sind
 // unabhängig voneinander – keine Kette, keine Querverweise.
 //
-// Wiederverwendet werden zwei reine Textfunktionen aus scripts/parser.js:
-// parseFrontmatter (inkl. CRLF-Normalisierung) und parseAbschnitte
-// (zerlegt den Rumpf in "## "-Abschnitte). Beide sind generisch und
-// kettenunabhängig; sie hier zu duplizieren wäre unnötige Dopplung und ein
-// Risiko, den dort schon gefundenen Windows-Zeilenende-Fehler erneut
-// einzubauen.
+// Wiederverwendet wird eine reine Textfunktion aus scripts/parser.js:
+// parseAbschnitte (zerlegt den Rumpf in "## "-Abschnitte). Das ist generisch
+// und kettenunabhängig. Frontmatter-Parsing wird dagegen lokal kopiert
+// (siehe parseFrontmatter unten), damit scripts/parser.js als Teil des
+// fertigen, getesteten Sprachkurses nicht verändert werden muss.
 const fs = require('node:fs');
-const { parseFrontmatter, parseAbschnitte } = require('./parser.js');
+const { parseAbschnitte } = require('./parser.js');
 
 const AUFGABE_MUSTER = /^Aufgabe\s*[:·\-–]?\s*(.*)$/;
+
+/**
+ * Liest Frontmatter und Rumpf einer Modul-Datei.
+ *
+ * Eigene, kleine Kopie der gleichnamigen Funktion aus scripts/parser.js,
+ * bewusst nicht von dort importiert: scripts/parser.js ist Teil des
+ * fertigen, getesteten Sprachkurses und wird für dieses Projekt nicht
+ * verändert, auch nicht um einen zusätzlichen Export zu ergänzen. Die
+ * CRLF-Normalisierung ist Teil dieser Kopie, aus demselben Grund wie dort:
+ * Git stellt unter Windows beim Auschecken auf CRLF um, sonst findet schon
+ * die Frontmatter-Suche nichts mehr.
+ */
+function parseFrontmatter(rohtext) {
+  const raw = rohtext.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+  const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (!match) throw new Error('Keine Frontmatter gefunden');
+  const [, frontmatterRaw, body] = match;
+  const frontmatter = {};
+  for (const line of frontmatterRaw.split('\n')) {
+    const lineMatch = line.match(/^(\w+):\s*(.*)$/);
+    if (!lineMatch) continue;
+    const [, key, rawValue] = lineMatch;
+    let value = rawValue.trim();
+    value = value.replace(/^"(.*)"$/, '$1');
+    frontmatter[key] = /^\d+$/.test(value) ? Number(value) : value;
+  }
+  return { frontmatter, body };
+}
 
 /**
  * Zerlegt den Inhalt einer Aufgabe in seine "### "-Unterabschnitte
