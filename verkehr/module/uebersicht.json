@@ -1,0 +1,6 @@
+[
+  { "id": 1, "titel": "Vorfahrt im Straßenverkehr", "themenbereich": "Vorfahrt", "akzent": "#FFE3B3" },
+  { "id": 2, "titel": "Verkehrsschilder und Fahrradwege", "themenbereich": "Schilder", "akzent": "#CFE8FF" },
+  { "id": 3, "titel": "Ampeln, Fußgängerüberwege, Abbiegen", "themenbereich": "Ampeln", "akzent": "#D9F2D9" },
+  { "id": 4, "titel": "Sicherheit und Kindertransport", "themenbereich": "Sicherheit", "akzent": "#E6DCF5" }
+]
