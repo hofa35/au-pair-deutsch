@@ -1,0 +1,210 @@
+/* Sicher Rad fahren — Stylesheet für Modulübersicht und Modulseiten.
+   Eigenständige Optik, bewusst kein Bezug zur Mira-Palette des
+   Sprachkurses. Ausgangspunkt: Verkehrsschild-Farben (Vorfahrtsgelb,
+   Verkehrsblau), dazu Grün/Rot für die Richtig/Falsch-Rückmeldung.
+   Keine externen Schriften, keine Netzwerk-Aufrufe: System-Schriftstapel. */
+
+:root {
+  --grund: #F4F7FB;
+  --karte: #FFFFFF;
+
+  --text: #1F2A33;
+  --text-sanft: #45545F;
+  --text-leise: #5C6B76;
+
+  --primaer: #1C4E80;
+  --primaer-dunkel: #15395E;
+  --gelb-hell: #FFE9B3;
+  --blau-hell: #D9E8F7;
+  --violett-hell: #E6DCF5;
+
+  --richtig: #2E7D32;
+  --richtig-hell: #E3F3E3;
+  --falsch: #C62828;
+  --falsch-hell: #FBE4E4;
+
+  --linie: rgba(31, 42, 51, 0.12);
+  --linie-zart: rgba(31, 42, 51, 0.07);
+  --schatten: 0 1px 2px rgba(31, 42, 51, 0.05), 0 8px 24px -14px rgba(31, 42, 51, 0.35);
+
+  --radius: 1rem;
+  --radius-gross: 1.4rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { font-size: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--grund);
+}
+
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; border-radius: 4px; }
+
+.kopfzeile {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem clamp(1rem, 4vw, 2.5rem);
+  background: rgba(244, 247, 251, 0.9);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--linie-zart);
+}
+
+.wortmarke { font-weight: 700; letter-spacing: -0.01em; }
+
+.kopf-hinweis {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-leise);
+}
+
+.zurueck {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--primaer);
+}
+
+main { max-width: 56rem; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem) 4rem; }
+
+/* Startseite */
+
+.hero { padding: 3rem 0 2rem; }
+.augenbraue {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primaer);
+  margin: 0 0 0.5rem;
+}
+.hero h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); margin: 0 0 1rem; }
+.hero-fliess { color: var(--text-sanft); max-width: 42rem; }
+.hero-kleingedruckt { font-size: 0.85rem; color: var(--text-leise); }
+
+.uebersicht-kopf { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 0.5rem; margin-bottom: 1.25rem; }
+.uebersicht-stand { color: var(--text-leise); font-size: 0.9rem; margin: 0; }
+
+.karten {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.karte {
+  display: block;
+  background: var(--karte);
+  border-radius: var(--radius-gross);
+  box-shadow: var(--schatten);
+  padding: 1.25rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease;
+}
+.karte--offen:hover { transform: translateY(-2px); }
+.karte--bald { opacity: 0.6; cursor: default; }
+
+.karte-kopf {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: calc(var(--radius) - 0.2rem);
+  padding: 0.4rem 0.7rem;
+  margin-bottom: 0.75rem;
+  width: fit-content;
+}
+.karte-nummer { font-weight: 700; }
+.karte-thema { font-size: 0.8rem; font-weight: 600; }
+.karte-titel { margin: 0 0 0.5rem; font-size: 1.05rem; }
+.karte-status { font-size: 0.75rem; color: var(--text-leise); }
+.karte-pfeil { color: var(--primaer); }
+
+/* Modulseite */
+
+.modul h1 { margin-top: 1.5rem; }
+
+.erklaerung {
+  background: var(--karte);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  box-shadow: var(--schatten);
+  margin: 1rem 0;
+}
+.erklaerung-text { margin: 0; white-space: pre-line; }
+.sprach-umschalter {
+  margin-top: 0.75rem;
+  border: none;
+  background: var(--blau-hell);
+  color: var(--primaer-dunkel);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.block { margin: 2rem 0; }
+.block h2 { margin-bottom: 0.75rem; }
+
+.aufgabe {
+  background: var(--karte);
+  border-radius: var(--radius-gross);
+  box-shadow: var(--schatten);
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+.aufgabe h3 { margin-top: 0; }
+.aufgabe-bild { border-radius: var(--radius); overflow: hidden; margin-bottom: 1rem; }
+.aufgabe-bild img { width: 100%; }
+
+.erklaerung--frage { background: var(--gelb-hell); box-shadow: none; }
+
+.optionen { display: flex; flex-direction: column; gap: 0.6rem; margin: 1rem 0; }
+.option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--linie);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+.option input { accent-color: var(--primaer); }
+.option--richtig { border-color: var(--richtig); background: var(--richtig-hell); }
+.option--falsch { border-color: var(--falsch); background: var(--falsch-hell); }
+
+.rueckmeldung {
+  font-weight: 700;
+  padding: 0.6rem 0.9rem;
+  border-radius: var(--radius);
+  margin: 0 0 1rem;
+}
+.rueckmeldung--richtig { background: var(--richtig-hell); color: var(--richtig); }
+.rueckmeldung--falsch { background: var(--falsch-hell); color: var(--falsch); }
+
+.erklaerung-feld .erklaerung { background: var(--violett-hell); box-shadow: none; }
+
+.modul-fuss { margin-top: 2rem; }
+
+@media (max-width: 40rem) {
+  main { padding-left: 1rem; padding-right: 1rem; }
+}
