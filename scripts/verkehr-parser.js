@@ -4,13 +4,16 @@
 // gibt es nur eine Art von Dokument (Verkehrsmodul), und Module sind
 // unabhängig voneinander – keine Kette, keine Querverweise.
 //
-// Wiederverwendet wird eine reine Textfunktion aus scripts/parser.js:
-// parseAbschnitte (zerlegt den Rumpf in "## "-Abschnitte). Das ist generisch
-// und kettenunabhängig. Frontmatter-Parsing wird dagegen lokal kopiert
-// (siehe parseFrontmatter unten), damit scripts/parser.js als Teil des
-// fertigen, getesteten Sprachkurses nicht verändert werden muss.
+// Wiederverwendet werden zwei reine Textfunktionen aus scripts/parser.js:
+// parseAbschnitte (zerlegt den Rumpf in "## "-Abschnitte) und
+// normalisiereZeilenenden (CRLF/BOM-Behandlung). Beide sind bereits
+// exportiert, generisch und kettenunabhängig. Nur die Frontmatter-Parsing-
+// *Struktur* selbst (die "---"/Schlüssel-Wert-Auswertung, die parser.js
+// nicht eigenständig exportiert) ist lokal kopiert (siehe parseFrontmatter
+// unten), damit scripts/parser.js als Teil des fertigen, getesteten
+// Sprachkurses nicht verändert werden muss.
 const fs = require('node:fs');
-const { parseAbschnitte } = require('./parser.js');
+const { parseAbschnitte, normalisiereZeilenenden } = require('./parser.js');
 
 const AUFGABE_MUSTER = /^Aufgabe\s*[:·\-–]?\s*(.*)$/;
 
@@ -21,12 +24,12 @@ const AUFGABE_MUSTER = /^Aufgabe\s*[:·\-–]?\s*(.*)$/;
  * bewusst nicht von dort importiert: scripts/parser.js ist Teil des
  * fertigen, getesteten Sprachkurses und wird für dieses Projekt nicht
  * verändert, auch nicht um einen zusätzlichen Export zu ergänzen. Die
- * CRLF-Normalisierung ist Teil dieser Kopie, aus demselben Grund wie dort:
- * Git stellt unter Windows beim Auschecken auf CRLF um, sonst findet schon
- * die Frontmatter-Suche nichts mehr.
+ * CRLF-Normalisierung selbst übernimmt aber die bereits exportierte
+ * normalisiereZeilenenden() aus parser.js – nur die "---"/Schlüssel-Wert-
+ * Struktur rundherum ist lokal kopiert.
  */
 function parseFrontmatter(rohtext) {
-  const raw = rohtext.replace(/^﻿/, '').replace(/\r\n?/g, '\n');
+  const raw = normalisiereZeilenenden(rohtext);
   const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) throw new Error('Keine Frontmatter gefunden');
   const [, frontmatterRaw, body] = match;

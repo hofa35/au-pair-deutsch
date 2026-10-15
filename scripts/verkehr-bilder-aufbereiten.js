@@ -48,7 +48,7 @@ function main() {
     const ziel = path.join(ZIEL, zielName);
     ffmpeg([
       '-i', quelle,
-      '-vf', `scale=${BREITE}:${HOEHE}:flags=lanczos`,
+      '-vf', `scale=${BREITE}:${HOEHE}:force_original_aspect_ratio=increase:flags=lanczos,crop=${BREITE}:${HOEHE}`,
       '-c:v', 'libwebp', '-lossless', '0', '-q:v', '82', '-compression_level', '6',
       '-frames:v', '1',
       ziel,

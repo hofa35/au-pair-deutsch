@@ -15,21 +15,21 @@ In this module you learn who gets to go first in typical traffic situations. The
 
 ## Regel Deutsch
 
-Grundregel: "Rechts vor links". An Kreuzungen ohne Vorfahrtsschilder und ohne Ampel hat immer das Fahrzeug Vorfahrt, das von rechts kommt. Das gilt auch für Fahrräder.
+Grundregel: "Rechts vor links". An Kreuzungen ohne Vorfahrtsschilder und ohne Ampel hat in der Regel das Fahrzeug Vorfahrt, das von rechts kommt. Das gilt auch für Fahrräder.
 
 Zwei wichtige Ausnahmen:
 - Ein gelbes Rautenschild (Vorfahrtsstraße) bedeutet: Du hast Vorfahrt vor allen, die aus einer Seitenstraße kommen, egal ob von rechts oder links.
-- Ein rotes Schild mit weißer Spitze nach unten ("Vorfahrt gewähren") oder ein Stoppschild bedeutet: Du musst andere zuerst fahren lassen.
+- Ein weißes Dreieckschild mit rotem Rand und der Spitze nach unten ("Vorfahrt gewähren") oder ein Stoppschild bedeutet: Du musst andere zuerst fahren lassen.
 
 Im Kreisverkehr hat grundsätzlich der Verkehr, der sich schon im Kreis befindet, Vorfahrt vor dem, der einfahren möchte.
 
 ## Regel Englisch
 
-Basic rule: "right before left". At intersections without priority signs and without traffic lights, the vehicle coming from the right always has the right of way. This applies to bicycles too.
+Basic rule: "right before left". At intersections without priority signs and without traffic lights, the vehicle coming from the right generally has the right of way. This applies to bicycles too.
 
 Two important exceptions:
 - A yellow diamond sign (priority road) means: you have the right of way over anyone coming from a side street, regardless of whether they are on your right or left.
-- A red sign with a white triangle pointing down ("yield") or a stop sign means: you must let others go first.
+- A white triangular sign with a red border, point facing down ("yield"), or a stop sign means: you must let others go first.
 
 In a roundabout, traffic that is already inside the circle generally has the right of way over traffic that wants to enter.
 

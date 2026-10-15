@@ -44,6 +44,10 @@ function werteAufgabeAus(formular) {
 function registriereUebungen() {
   document.querySelectorAll('.optionen').forEach((formular) => {
     formular.addEventListener('change', () => werteAufgabeAus(formular));
+    // Verhindert, dass die Enter-Taste auf einem Options-Feld das Formular
+    // absendet und die Seite neu lädt – ohne Absende-Knopf würde das sonst
+    // jede gewählte Antwort und jede aufgeklappte Erklärung löschen.
+    formular.addEventListener('submit', (ereignis) => ereignis.preventDefault());
   });
 }
 
