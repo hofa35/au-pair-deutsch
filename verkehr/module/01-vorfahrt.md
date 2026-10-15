@@ -116,3 +116,31 @@ Im Kreisverkehr hat der Verkehr, der sich bereits im Kreis befindet, grundsätzl
 ### Erklärung Englisch
 
 In a roundabout, traffic that is already inside the circle generally has the right of way over traffic that wants to enter. This is indicated by the sign with three arrows in a circle at the entrance. This applies to you on a bicycle too: you must wait for a gap before entering.
+
+## Aufgabe: Links abbiegen auf der Vorfahrtsstraße
+
+### Bild
+
+vorfahrt-links-abbiegen.webp
+
+### Frage Deutsch
+
+Du fährst mit dem Fahrrad auf einer Vorfahrtsstraße und willst nach links abbiegen. Was machst du zuerst?
+
+### Frage Englisch
+
+You're cycling on a priority road and want to turn left. What's the first thing you do?
+
+### Optionen
+
+- [ ] Direkt nach links abbiegen, du hast ja Vorfahrt
+- [x] Schulterblick machen, mit dem linken Arm das Handzeichen geben und dich zur Fahrbahnmitte einordnen
+- [ ] Am rechten Fahrbahnrand bleiben und von dort abbiegen
+
+### Erklärung Deutsch
+
+Zum Linksabbiegen schaust du zuerst über die Schulter, ob von hinten jemand kommt, gibst mit ausgestrecktem linken Arm das Handzeichen und ordnest dich zur Mitte der Fahrbahn ein. Erst wenn kein Gegenverkehr mehr kommt, biegst du ab. Wichtig: Die Vorfahrt auf der Vorfahrtsstraße gilt gegenüber Seitenstraßen – beim Linksabbiegen musst du trotzdem den entgegenkommenden Verkehr durchfahren lassen, das sind zwei unterschiedliche Regeln.
+
+### Erklärung Englisch
+
+To turn left, first glance back over your shoulder to check for traffic behind you, signal with your left arm extended, and move toward the middle of the road. Only turn once there's no oncoming traffic left to wait for. Important: having the right of way on a priority road applies to side streets joining it – when turning left, you still have to let oncoming traffic pass first, these are two separate rules.
