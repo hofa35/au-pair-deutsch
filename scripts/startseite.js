@@ -164,6 +164,7 @@ function renderStartseiteHtml(uebersicht, gebaut, versionen = {}, wiederholungen
     <p class="hero-fliess">Fünfzehn Lektionen zu dem, was wirklich jeden Tag vorkommt: Gastfamilie, Haushalt, Kinder, Einkaufen, Termine, Notfälle. Alles steht zuerst auf einfachem Deutsch. Wenn du etwas nicht verstehst, schaltest du mit einem Klick auf Englisch um.</p>
     <p class="hero-knopfreihe">${startKnopf}</p>
     <p class="hero-kleingedruckt">Kein Konto, keine Anmeldung. Dein Fortschritt bleibt nur in deinem Browser und wird nirgendwohin geschickt.</p>
+    <p class="hero-verweis"><a href="verkehr/index.html">Neu: Sicher Rad fahren – Verkehrsregeln für Au-Pairs</a></p>
   </div>
   <div class="hero-bild">
     <img src="bilder/mira.webp" alt="Mira winkt zur Begrüßung" width="640" height="1548" decoding="async">

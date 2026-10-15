@@ -212,6 +212,15 @@ a {
   color: var(--text-leise);
 }
 
+.hero-verweis {
+  margin-top: 0.75rem;
+  font-weight: 600;
+}
+
+.hero-verweis a {
+  text-decoration: underline;
+}
+
 .hero-bild {
   display: flex;
   justify-content: center;
